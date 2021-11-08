@@ -1,5 +1,9 @@
 from pico2d import *
 
+import Mario
+import item_object
+import enemy_object
+
 # Game object class here
 class Character:
     def __init__(self):
@@ -44,94 +48,6 @@ class Character:
             self.image.clip_draw(130 - (19 * self.framex),(24 * self.framey) - 1,20,23,self.x,self.y, 40, 46)
         pass
 
-class Gomba:
-    def __init__(self):
-        self.image = load_image('gomba.png')
-        self.frame = 0
-        self.Right = False
-        self.x = 400
-        self.y = 20
-    def update(self):
-        self.frame = (self.frame + 1) % 8
-        if self.Right:
-            self.x += 5
-            if self.x > 800:
-                self.Right = False
-        else:
-            self.x -= 5
-            if self.x < 0:
-                self.Right = True
-
-    def Draw(self):
-        if self.Right:
-            self.image.clip_composite_draw(5, 32 * (27 - self.frame) + 7, 19, 20, 0, 'h', self.x, self.y, 38, 44)
-        else:
-            self.image.clip_draw(5, 32 * (27 - self.frame) + 7, 19, 20, self.x, self.y, 38, 44)
-
-
-class Turtle:
-    def __init__(self):
-        self.image = load_image('turtle.png')
-        self.frame = 0
-        self.Right = False
-        self.x = 500
-        self.y = 25
-    def update(self):
-        self.frame = (self.frame + 1) % 16
-        if self.Right:
-            self.x += 5
-            if self.x > 800:
-                self.Right = False
-        else:
-            self.x -= 5
-            if self.x < 0:
-                self.Right = True
-
-    def Draw(self):
-        if self.Right:
-            self.image.clip_composite_draw(0,  32 * (41 - self.frame) + 12, 20, 35, 0, 'h', self.x, self.y, 40, 70)
-        else:
-            self.image.clip_draw(0, 32 * (41 - self.frame) + 12, 20, 35, self.x, self.y, 40, 70)
-
-
-class Item_Mushroom:
-    def __init__(self):
-        self.image = load_image('mushroom.png')
-        self.Right = False
-        self.x = 100
-        self.y = 15
-    def update(self):
-        if self.Right:
-            self.x += 5
-            if self.x > 800:
-                self.Right = False
-        else:
-            self.x -= 5
-            if self.x < 0:
-                self.Right = True
-
-    def Draw(self):
-            self.image.draw(self.x,self.y, 30, 30)
-
-
-class Item_Box:
-    def __init__(self):
-        self.image = load_image('qblock_strips.png')
-        self.framex = 0
-        self.framey = 8
-        self.x = 400
-        self.y = 80
-    def update(self):
-        self.framex += 1
-        if self.framex > 6:
-            self.framex = 0
-            self.framey -= 1
-        if self.framey == 6:
-            self.framey = 8
-
-    def Draw(self):
-            self.image.clip_draw(self.framex * 24, self.framey * 24, 24, 24, self.x , self.y,30,30)
-
 
 def handle_events():
     global running
@@ -170,10 +86,10 @@ marioMove = False
 marioRight = False
 map = load_image('background.png')
 mario = Character()
-gomba = Gomba()
-turtle = Turtle()
-mushroom = Item_Mushroom()
-itembox = Item_Box()
+gomba = enemy_object.Gomba()
+turtle = enemy_object.Turtle()
+mushroom = item_object.Item_Mushroom()
+itembox = item_object.Item_Box()
 
 # game main loop code
 

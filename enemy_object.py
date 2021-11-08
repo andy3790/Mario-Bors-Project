@@ -3,8 +3,10 @@ from pico2d import *
 # Game object class here
 
 class Gomba:
+    image = None
     def __init__(self):
-        self.image = load_image('gomba.png')
+        if Gomba.image == None:
+            Gomba.image = load_image('gomba.png')
         self.frame = 0
         self.Right = False
         self.x = 400
@@ -28,8 +30,10 @@ class Gomba:
 
 
 class Turtle:
+    image = None
     def __init__(self):
-        self.image = load_image('turtle.png')
+        if Turtle.image == None:
+            Turtle.image = load_image('turtle.png')
         self.frame = 0
         self.Right = False
         self.x = 500
