@@ -6,7 +6,7 @@ class Gomba:
     image = None
     def __init__(self):
         if Gomba.image == None:
-            Gomba.image = load_image('gomba.png')
+            Gomba.image = load_image('image/gomba.png')
         self.frame = 0
         self.Right = False
         self.x = 400
@@ -33,7 +33,7 @@ class Turtle:
     image = None
     def __init__(self):
         if Turtle.image == None:
-            Turtle.image = load_image('turtle.png')
+            Turtle.image = load_image('image/turtle.png')
         self.frame = 0
         self.Right = False
         self.x = 500

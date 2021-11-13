@@ -3,7 +3,7 @@ from pico2d import *
 # Game object class here
 class Item_Box:
     def __init__(self):
-        self.image = load_image('qblock_strips.png')
+        self.image = load_image('image/qblock_strips.png')
         self.framex = 0
         self.framey = 8
         self.x = 400

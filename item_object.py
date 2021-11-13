@@ -5,7 +5,7 @@ class Item_Mushroom:
     image = None
     def __init__(self):
         if Item_Mushroom.image == None:
-            Item_Mushroom.image = load_image('mushroom.png')
+            Item_Mushroom.image = load_image('image/mushroom.png')
         self.Right = False
         self.x = 100
         self.y = 15
@@ -27,7 +27,7 @@ class Item_Box:
     image = None
     def __init__(self):
         if Item_Box.image == None:
-            Item_Box.image = load_image('qblock_strips.png')
+            Item_Box.image = load_image('image/qblock_strips.png')
         self.framex = 0
         self.framey = 8
         self.x = 400
