@@ -24,8 +24,8 @@ def enter():
     mario = Character()
     gomba = Gomba()
     turtle = Turtle()
-    # game_world.add_object(turtle, 0)
-    # game_world.add_object(gomba, 0)
+    game_world.add_object(turtle, 0)
+    game_world.add_object(gomba, 0)
     game_world.add_object(mario, 1)
 
 

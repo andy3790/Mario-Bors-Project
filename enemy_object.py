@@ -22,7 +22,7 @@ class Gomba:
             if self.x < 0:
                 self.Right = True
 
-    def Draw(self):
+    def draw(self):
         if self.Right:
             self.image.clip_composite_draw(5, 32 * (27 - self.frame) + 7, 19, 20, 0, 'h', self.x, self.y, 38, 44)
         else:
@@ -49,7 +49,7 @@ class Turtle:
             if self.x < 0:
                 self.Right = True
 
-    def Draw(self):
+    def draw(self):
         if self.Right:
             self.image.clip_composite_draw(0,  32 * (41 - self.frame) + 12, 20, 35, 0, 'h', self.x, self.y, 40, 70)
         else:
