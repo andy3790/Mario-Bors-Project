@@ -58,15 +58,17 @@ class IdleState:
         if mario.frame_x / 9 > 0:
             mario.frame_y = (mario.frame_y + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 9
         mario.frame_x = (mario.frame_x + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 9
-        if mario.frame_y >= 9 and mario.frame_x >= 6:
+        if mario.frame_y >= 8 and mario.frame_x >= 6:
             mario.frame_x, mario.frame_y = 0, 0;
 
         pass
 
     def draw(mario):
         if mario.dir == 1:
-            mario.image.clip_composite_draw(int(mario.frame_x) * 26 + 17, 4461 - (int(mario.frame_y) * 26 + 13), 14, 20, 0, '', mario.x, mario.y, 50, 70)
-        pass
+            mario.image_s_idle.clip_composite_draw(int(mario.frame_x) * 22, 199 - (int(mario.frame_y) * 22 + 23), 23, 23, 0, '', mario.x, mario.y, mario.size_x, mario.size_y)
+        elif mario.dir == -1:
+            mario.image_s_idle.clip_composite_draw(int(mario.frame_x) * 22, 199 - (int(mario.frame_y) * 22 + 23), 23, 23, 0, 'h', mario.x, mario.y, mario.size_x, mario.size_y)
+
 
 class RunState:
     def enter(mario, event):
@@ -88,6 +90,7 @@ class RunState:
         pass
 
     def draw(mario):
+
         pass
 
 class DashState:
@@ -119,10 +122,13 @@ next_state_table = {
 
 class Character:
     image = None
+
     def __init__(self):
         if Character.image == None:
             Character.image = load_image('image/NSMBSmallMario_Misc_.png')
+        self.image_s_idle = load_image('image/Mario_small idle 23x23.png')
         self.x, self.y = 800 // 2, 90
+        self.size_x, self.size_y = 40, 50
         self.dir = 1
         self.velocity = 0
         self.frame_x = 0
