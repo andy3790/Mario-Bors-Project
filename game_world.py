@@ -1,7 +1,10 @@
 
 # layer 0: Background Objects
-# layer 1: Foreground Objects
-objects = [[],[]]
+# layer 1: Fild Objects
+# layer 2: Item Objects
+# layer 3: Enemy Objects
+# layer 4: Player Objects
+objects = [[],[],[],[],[]]
 
 
 def add_object(o, layer):

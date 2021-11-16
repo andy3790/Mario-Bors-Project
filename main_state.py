@@ -9,6 +9,8 @@ import game_world
 from Mario import Character
 from enemy_object import Gomba
 from enemy_object import Turtle
+from item_object import Item_Box
+from item_object import Item_Mushroom
 
 
 name = "MainState"
@@ -17,6 +19,16 @@ mario = None
 gomba = None
 turtle = None
 
+def Crash_Check(a, b):
+    left_a, bottom_a, right_a, top_a = a.get_bb()
+    left_b, bottom_b, right_b, top_b = b.get_bb()
+
+    if left_a > right_b: return False
+    if right_a < left_b: return False
+    if top_a < bottom_b: return False
+    if bottom_a > top_b: return False
+    return True
+
 def enter():
     global mario
     global gomba
@@ -24,9 +36,13 @@ def enter():
     mario = Character()
     gomba = Gomba()
     turtle = Turtle()
-    game_world.add_object(turtle, 0)
-    game_world.add_object(gomba, 0)
-    game_world.add_object(mario, 1)
+    itembox = Item_Box()
+    itemmush = Item_Mushroom()
+    game_world.add_object(itembox, 1)
+    game_world.add_object(itemmush, 2)
+    game_world.add_object(turtle, 3)
+    game_world.add_object(gomba, 3)
+    game_world.add_object(mario, 4)
 
 
 def exit():
