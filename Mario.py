@@ -14,7 +14,7 @@ RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 # ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 # FRAMES_PER_ACTION = 9
 
-RIGHT_DOWN, LEFT_DOWN, RIGHT_UP, LEFT_UP, SLEEP_TIMER,  SHIFT_DOWN, SHIFT_UP = range(7)
+RIGHT_DOWN, LEFT_DOWN, RIGHT_UP, LEFT_UP, SLEEP_TIMER,  SHIFT_DOWN, SHIFT_UP, DCCEL_WALK, DCCEL_RUN  = range(9)
 
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RIGHT_DOWN,
@@ -74,8 +74,8 @@ class IdleState:
         elif mario.dir == -1:
             mario.image_s_idle.clip_composite_draw(int(mario.frame_x) * 22, 199 - (int(mario.frame_y) * 22 + 23), 23, 23, 0, 'h', mario.x, mario.y, mario.size_x, mario.size_y)
 
-class WalkState:
-    TIME_PER_ACTION = 1.0
+class WalkState_Accel:
+    TIME_PER_ACTION = 0.8
     ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
     FRAMES_PER_ACTION = 27
     ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
@@ -100,7 +100,7 @@ class WalkState:
     def do(mario):
         mario.x += mario.velocity * RUN_SPEED_PPS * game_framework.frame_time
 
-        mario.frame_x = (mario.frame_x + WalkState.ONE_ACTION * game_framework.frame_time)
+        mario.frame_x = (mario.frame_x + WalkState_Accel.ONE_ACTION * game_framework.frame_time)
         if mario.frame_x // 9 == 1:
             mario.frame_y = (mario.frame_y + 1)
             mario.frame_x = mario.frame_x % 9
@@ -114,7 +114,49 @@ class WalkState:
         elif mario.dir == -1:
             mario.image_s_walk.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, 'h', mario.x, mario.y, mario.size_x, mario.size_y)
 
-class RunState:
+class WalkState_Dccel:
+    TIME_PER_ACTION = 0.8
+    ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+    FRAMES_PER_ACTION = 27
+    ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
+
+    def enter(mario, event):
+        if event == RIGHT_DOWN:
+            mario.velocity += 1
+        elif event == LEFT_DOWN:
+            mario.velocity -= 1
+        elif event == RIGHT_UP:
+            mario.velocity -= 1
+        elif event == LEFT_UP:
+            mario.velocity += 1
+        mario.dir = mario.velocity
+        if mario.frame_x >= 9 or mario.frame_y >= 3:
+            mario.frame_x, mario.frame_y = 0, 0
+        pass
+
+    def exit(mario, event):
+        pass
+
+    def do(mario):
+        if -0.1 < mario.accel < 0.1:
+
+        mario.x += mario.velocity * RUN_SPEED_PPS * game_framework.frame_time
+
+        mario.frame_x = (mario.frame_x + WalkState_Dccel.ONE_ACTION * game_framework.frame_time)
+        if mario.frame_x // 9 == 1:
+            mario.frame_y = (mario.frame_y + 1)
+            mario.frame_x = mario.frame_x % 9
+        if mario.frame_y >= 3:
+            mario.frame_x, mario.frame_y = 0, 0;
+        pass
+
+    def draw(mario):
+        if mario.dir == 1:
+            mario.image_s_walk.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, '', mario.x, mario.y, mario.size_x, mario.size_y)
+        elif mario.dir == -1:
+            mario.image_s_walk.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, 'h', mario.x, mario.y, mario.size_x, mario.size_y)
+
+class RunState_Accel:
     TIME_PER_ACTION = 0.5
     ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
     FRAMES_PER_ACTION = 20
@@ -136,9 +178,55 @@ class RunState:
         pass
 
     def do(mario):
-        mario.x += mario.velocity * 2 * RUN_SPEED_PPS * game_framework.frame_time
+        print(mario.velocity)
+        mario.x += (mario.velocity + mario.accel) * 2 * RUN_SPEED_PPS * game_framework.frame_time
+        if -1 < mario.accel < 1:
+            mario.accel += (mario.velocity / 1000) * RUN_SPEED_PPS * game_framework.frame_time
 
-        mario.frame_x = (mario.frame_x + RunState.ONE_ACTION * game_framework.frame_time)
+        mario.frame_x = (mario.frame_x + RunState_Accel.ONE_ACTION * game_framework.frame_time)
+        if mario.frame_x // 7 == 1:
+            mario.frame_y = (mario.frame_y + 1)
+            mario.frame_x = mario.frame_x % 7
+        if mario.frame_y >= 2 and mario.frame_x >= 5:
+            mario.frame_x, mario.frame_y = 0, 0;
+        pass
+
+    def draw(mario):
+        if mario.dir == 1:
+            mario.image_s_run.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, '', mario.x, mario.y, mario.size_x, mario.size_y)
+        elif mario.dir == -1:
+            mario.image_s_run.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, 'h', mario.x, mario.y, mario.size_x, mario.size_y)
+
+class RunState_Dccel:
+    TIME_PER_ACTION = 0.5
+    ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+    FRAMES_PER_ACTION = 20
+    ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
+
+    def enter(mario, event):
+        if event == RIGHT_DOWN:
+            mario.velocity += 1
+        elif event == LEFT_DOWN:
+            mario.velocity -= 1
+        elif event == RIGHT_UP:
+            mario.velocity -= 1
+        elif event == LEFT_UP:
+            mario.velocity += 1
+        mario.dir = mario.velocity
+        pass
+
+    def exit(mario, event):
+        pass
+
+    def do(mario):
+        print(mario.velocity)
+        mario.x += (mario.velocity + mario.accel) * 2 * RUN_SPEED_PPS * game_framework.frame_time
+        if -0.1 < mario.accel < 0.1:
+            mario.accel = 0
+        else:
+            mario.accel -= (mario.velocity / 100) * RUN_SPEED_PPS * game_framework.frame_time
+
+        mario.frame_x = (mario.frame_x + RunState_Dccel.ONE_ACTION * game_framework.frame_time)
         if mario.frame_x // 7 == 1:
             mario.frame_y = (mario.frame_y + 1)
             mario.frame_x = mario.frame_x % 7
@@ -168,15 +256,19 @@ class DashState:
 
 
 next_state_table = {
-    DashState: {SHIFT_UP: RunState,
+    DashState: {SHIFT_UP: RunState_Accel,
                 LEFT_UP: IdleState , LEFT_DOWN: IdleState, RIGHT_UP: IdleState, RIGHT_DOWN: IdleState},
-    IdleState: {RIGHT_UP: WalkState, LEFT_UP: WalkState, RIGHT_DOWN: WalkState, LEFT_DOWN: WalkState, SLEEP_TIMER: SleepState,
+    IdleState: {RIGHT_UP: WalkState_Accel, LEFT_UP: WalkState_Accel, RIGHT_DOWN: WalkState_Accel, LEFT_DOWN: WalkState_Accel, SLEEP_TIMER: SleepState,
                 SHIFT_UP: IdleState, SHIFT_DOWN: IdleState},
-    WalkState: {RIGHT_UP: IdleState, LEFT_UP: IdleState, LEFT_DOWN: IdleState, RIGHT_DOWN: IdleState,
-               SHIFT_DOWN: RunState, SHIFT_UP: WalkState},
-    RunState: {RIGHT_UP: IdleState, LEFT_UP: IdleState, LEFT_DOWN: IdleState, RIGHT_DOWN: IdleState,
-               SHIFT_DOWN: RunState, SHIFT_UP: WalkState},
-    SleepState: {LEFT_DOWN: RunState, RIGHT_DOWN: RunState, LEFT_UP: RunState, RIGHT_UP: RunState,
+    WalkState_Accel: {RIGHT_UP: IdleState, LEFT_UP: IdleState, LEFT_DOWN: IdleState, RIGHT_DOWN: IdleState,
+               SHIFT_DOWN: RunState_Accel, SHIFT_UP: WalkState_Accel},
+    WalkState_Dccel: {RIGHT_UP: IdleState, LEFT_UP: IdleState, LEFT_DOWN: IdleState, RIGHT_DOWN: IdleState,
+                      SHIFT_DOWN: RunState_Accel, SHIFT_UP: WalkState_Accel},
+    RunState_Accel: {RIGHT_UP: RunState_Dccel, LEFT_UP: RunState_Dccel, LEFT_DOWN: RunState_Dccel, RIGHT_DOWN: RunState_Dccel,
+               SHIFT_DOWN: RunState_Dccel, SHIFT_UP: RunState_Dccel},
+    RunState_Dccel: {RIGHT_UP: WalkState_Dccel, LEFT_UP: WalkState_Dccel, LEFT_DOWN: WalkState_Dccel, RIGHT_DOWN: WalkState_Dccel,
+                     SHIFT_DOWN: RunState_Accel, SHIFT_UP: WalkState_Dccel},
+    SleepState: {LEFT_DOWN: RunState_Accel, RIGHT_DOWN: RunState_Accel, LEFT_UP: RunState_Accel, RIGHT_UP: RunState_Accel,
                  SHIFT_DOWN: SleepState, SHIFT_UP: SleepState}
 }
 
@@ -196,6 +288,7 @@ class Character:
         self.velocity = 0
         self.frame_x = 0
         self.frame_y = 0
+        self.accel = 0
         self.timer = 0
         self.event_que = []
         self.cur_state = IdleState
