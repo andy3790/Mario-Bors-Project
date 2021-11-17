@@ -17,8 +17,10 @@ class Gomba:
             Gomba.image = load_image('image/gomba.png')
         self.frame = 0
         self.Right = False
-        self.x = 400
+        self.x = 600
         self.y = 20
+        self.size_x = 38
+        self.size_y = 44
 
     def get_bb(self):
         return self.x - 15, self.y - 15, self.x + 15, self.y + 15
@@ -36,9 +38,9 @@ class Gomba:
 
     def draw(self):
         if self.Right:
-            self.image.clip_composite_draw(5, 32 * (27 - int(self.frame)) + 7, 19, 20, 0, 'h', self.x, self.y, 38, 44)
+            self.image.clip_composite_draw(5, 32 * (27 - int(self.frame)) + 7, 19, 20, 0, 'h', self.x, self.y, self.size_x, self.size_y)
         else:
-            self.image.clip_draw(5, 32 * (27 - int(self.frame)) + 7, 19, 20, self.x, self.y, 38, 44)
+            self.image.clip_draw(5, 32 * (27 - int(self.frame)) + 7, 19, 20, self.x, self.y, self.size_x, self.size_y)
 
         draw_rectangle(*self.get_bb())
 
@@ -54,11 +56,13 @@ class Turtle:
             Turtle.image = load_image('image/turtle.png')
         self.frame = 0
         self.Right = False
-        self.x = 500
+        self.x = 700
         self.y = 25
+        self.size_x = 40
+        self.size_y = 70
 
     def get_bb(self):
-        return self.x - 13, self.y - 20, self.x + 13, self.y + 20
+        return self.x - 13, self.y - 35, self.x + 13, self.y + 25
 
     def update(self):
         self.frame = (self.frame + Turtle.ONE_ACTION * game_framework.frame_time) % 16
@@ -73,8 +77,8 @@ class Turtle:
 
     def draw(self):
         if self.Right:
-            self.image.clip_composite_draw(0,  32 * (41 - int(self.frame)) + 12, 20, 35, 0, 'h', self.x, self.y, 40, 70)
+            self.image.clip_composite_draw(0,  32 * (41 - int(self.frame)) + 17, 20, 30, 0, 'h', self.x, self.y, self.size_x, self.size_y)
         else:
-            self.image.clip_draw(0, 32 * (41 - int(self.frame)) + 12, 20, 35, self.x, self.y, 40, 70)
+            self.image.clip_draw(0, 32 * (41 - int(self.frame)) + 17, 20, 30, self.x, self.y, self.size_x, self.size_y)
 
         draw_rectangle(*self.get_bb())

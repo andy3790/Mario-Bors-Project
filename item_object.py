@@ -13,6 +13,8 @@ class Item_Mushroom:
         self.Right = False
         self.x = 100
         self.y = 15
+        self.size_x = 35
+        self.size_y = 35
 
     def get_bb(self):
         return self.x - 15, self.y - 15, self.x + 15, self.y + 15
@@ -28,7 +30,7 @@ class Item_Mushroom:
                 self.Right = True
 
     def draw(self):
-        self.image.draw(self.x,self.y, 30, 30)
+        self.image.draw(self.x,self.y, self.size_x, self.size_y)
 
         draw_rectangle(*self.get_bb())
 
@@ -39,13 +41,17 @@ class Item_Box:
     ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
     FRAMES_PER_ACTION = 16
     ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
-    def __init__(self):
+    def __init__(self, sx = 400, sy = 50):
         if Item_Box.image == None:
             Item_Box.image = load_image('image/qblock_strips.png')
         self.framex = 0
         self.framey = 8
-        self.x = 400
-        self.y = 80
+        self.x = sx
+        self.y = sy
+        self.size_x = 30
+        self.size_y = 30
+    def get_bb(self):
+        return self.x - 15, self.y - 15, self.x + 15, self.y + 15
     def update(self):
         self.framex += Item_Box.ONE_ACTION * game_framework.frame_time
         if self.framex > 6:
@@ -55,4 +61,4 @@ class Item_Box:
             self.framey = 8
 
     def draw(self):
-            self.image.clip_draw(int(self.framex) * 24, int(self.framey) * 24, 24, 24, self.x , self.y,30,30)
+            self.image.clip_draw(int(self.framex) * 24, int(self.framey) * 24, 24, 24, self.x , self.y,self.size_x, self.size_y)

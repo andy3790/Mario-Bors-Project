@@ -7,17 +7,24 @@ import game_framework
 import game_world
 
 from Mario import Character
-from enemy_object import Gomba
-from enemy_object import Turtle
-from item_object import Item_Box
-from item_object import Item_Mushroom
+from Mario import PIXEL_PER_METER
+import enemy_object
+import item_object
+import map_object
 
 
 name = "MainState"
 
+Gravity = 1000 * PIXEL_PER_METER
+gAccel = 0
+
 mario = None
+enemys = []
+items = []
 gomba = None
 turtle = None
+map = None
+itemBox = None
 
 def Crash_Check(a, b):
     left_a, bottom_a, right_a, top_a = a.get_bb()
@@ -31,17 +38,20 @@ def Crash_Check(a, b):
 
 def enter():
     global mario
-    global gomba
-    global turtle
+    global enemys
+    global items
+    global map
+    global itemBox
     mario = Character()
-    gomba = Gomba()
-    turtle = Turtle()
-    itembox = Item_Box()
-    itemmush = Item_Mushroom()
-    game_world.add_object(itembox, 1)
-    game_world.add_object(itemmush, 2)
-    game_world.add_object(turtle, 3)
-    game_world.add_object(gomba, 3)
+    map = map_object.Map_BackGround()
+    enemys.append(enemy_object.Gomba())
+    enemys.append(enemy_object.Turtle())
+    items.append(item_object.Item_Mushroom())
+    itemBox = item_object.Item_Box()
+    game_world.add_object(map, 0)
+    game_world.add_object(itemBox, 1)
+    game_world.add_objects(items, 2)
+    game_world.add_objects(enemys, 3)
     game_world.add_object(mario, 4)
 
 
@@ -68,9 +78,26 @@ def handle_events():
 
 
 def update():
+    global gAccel
     for game_object in game_world.all_objects():
         game_object.update()
     # fill here
+    mario.y -= gAccel * game_framework.frame_time
+    if gAccel < 5:
+        gAccel += Gravity * game_framework.frame_time
+    if Crash_Check(mario, map):
+        mario.y = 29 + mario.size_y // 2
+        gAccel = 0
+    for enemy in enemys:
+        if Crash_Check(enemy, map):
+            enemy.y = 30 + enemy.size_y // 2
+        if Crash_Check(enemy, itemBox):
+            enemy.Right = not enemy.Right
+            enemy.update()
+    for item in items:
+        if Crash_Check(item, map):
+            item.y = 30 + item.size_y // 2
+
     # delay(0.1)
 
 
