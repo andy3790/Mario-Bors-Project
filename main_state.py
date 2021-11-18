@@ -15,7 +15,7 @@ import map_object
 
 name = "MainState"
 
-Gravity = 1000 * PIXEL_PER_METER
+Gravity = 9.8 * PIXEL_PER_METER
 gAccel = 0
 
 mario = None
@@ -82,9 +82,9 @@ def update():
     for game_object in game_world.all_objects():
         game_object.update()
     # fill here
-    mario.y -= gAccel * game_framework.frame_time
-    if gAccel < 5:
-        gAccel += Gravity * game_framework.frame_time
+    # mario.y -= gAccel * game_framework.frame_time
+    # if gAccel < 18:
+    #     gAccel += Gravity * game_framework.frame_time
     if Crash_Check(mario, map):
         mario.y = 29 + mario.size_y // 2
         gAccel = 0

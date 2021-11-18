@@ -2,19 +2,21 @@ from pico2d import *
 
 import game_framework
 
+
 # Character Run Speed
-PIXEL_PER_METER = (10.0 / 0.3) # 10 pixel 30 cm
+PIXEL_PER_METER = (10.0 / 0.2) # 10 pixel 20 cm
 RUN_SPEED_KMPH = 10.0 # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
 RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
 RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 
+Gravity = 9.8 * PIXEL_PER_METER
 # Character Action Speed
 # TIME_PER_ACTION = 1.0
 # ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 # FRAMES_PER_ACTION = 9
 
-RIGHT_DOWN, LEFT_DOWN, RIGHT_UP, LEFT_UP, SLEEP_TIMER,  SHIFT_DOWN, SHIFT_UP, SPACE_DOWN, DCCEL_WALK, DCCEL_RUN  = range(10)
+RIGHT_DOWN, LEFT_DOWN, RIGHT_UP, LEFT_UP, SLEEP_TIMER,  SHIFT_DOWN, SHIFT_UP, SPACE_DOWN, DCCEL_WALK, DCCEL_RUN, JUMP_TO_IDLE, JUMP_TO_WALK  = range(12)
 
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RIGHT_DOWN,
@@ -183,8 +185,8 @@ class RunState_Accel:
 
     def do(mario):
         mario.x += (mario.velocity + mario.accel) * 2 * RUN_SPEED_PPS * game_framework.frame_time
-        if -1 < mario.accel < 1:
-            mario.accel += (mario.velocity / 1000) * RUN_SPEED_PPS * game_framework.frame_time
+        mario.accel += (mario.velocity / 100) * RUN_SPEED_PPS * game_framework.frame_time
+        mario.accel = clamp(-0.8, mario.accel, 0.8)
 
         mario.frame_x = (mario.frame_x + RunState_Accel.ONE_ACTION * game_framework.frame_time)
         if mario.frame_x // 7 == 1:
@@ -257,22 +259,59 @@ class DashState:
         pass
 
 class JumpState:
+    TIME_PER_ACTION = 0.5
+    ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+    FRAMES_PER_ACTION = 30
+    ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
     def enter(mario, event):
-        if mario.jumphight <= 0:
-            mario.jumphight = 200
+        if event == RIGHT_DOWN:
+            mario.velocity += 1
+        elif event == LEFT_DOWN:
+            mario.velocity -= 1
+        elif event == RIGHT_UP:
+            mario.velocity -= 1
+        elif event == LEFT_UP:
+            mario.velocity += 1
+        if mario.hight == 0:
+            mario.jump_timer = 0
+            mario.jstart_pos = mario.y
+            mario.hight = 0
         pass
 
     def exit(mario, event):
         pass
 
     def do(mario):
-        mario.y += 110 * game_framework.frame_time
-        mario.jumphight -= 100 * game_framework.frame_time
-        if mario.jumphight <= 0:
-            mario.add_event(SLEEP_TIMER)
+        mario.hight = (mario.jump_timer * mario.jump_timer * (-Gravity) / 2) + (mario.jump_timer * mario.jump_power)
+        mario.jump_timer += 1 * game_framework.frame_time
+        mario.y = mario.jstart_pos + mario.hight
+        if mario.velocity != 0:
+            mario.x += (mario.dir) * RUN_SPEED_PPS * game_framework.frame_time
+        # print(mario.jump_timer)
+
+        mario.frame_x = (mario.frame_x + RunState_Dccel.ONE_ACTION * game_framework.frame_time)
+        if mario.frame_x // 7 == 1:
+            mario.frame_y = (mario.frame_y + 1)
+            mario.frame_x = mario.frame_x % 7
+        if mario.frame_y >= 3 and mario.frame_x >= 2:
+            mario.frame_x, mario.frame_y = 2, 3;
+
+        if mario.y < mario.jstart_pos:
+            mario.hight = 0
+            mario.y = mario.jstart_pos
+
+            if mario.velocity == 0:
+                mario.add_event(JUMP_TO_IDLE)
+            else:
+                mario.add_event(JUMP_TO_WALK)
         pass
 
     def draw(mario):
+        if mario.velocity > 0:
+            mario.image_s_jump.clip_composite_draw(int(mario.frame_x) * 29, 146 - (int(mario.frame_y) * 29 + 30), 30, 30, 0, 'h', mario.x, mario.y, mario.size_x + 5, mario.size_y + 5)
+        else:
+            mario.image_s_jump.clip_composite_draw(int(mario.frame_x) * 29, 146 - (int(mario.frame_y) * 29 + 30), 30, 30, 0, '', mario.x, mario.y, mario.size_x + 5, mario.size_y + 5)
+
         pass
 
 
@@ -291,7 +330,7 @@ next_state_table = {
     #                  SHIFT_DOWN: RunState_Accel, SHIFT_UP: WalkState_Dccel},
     SleepState: {LEFT_DOWN: WalkState_Accel, RIGHT_DOWN: WalkState_Accel, LEFT_UP: WalkState_Accel, RIGHT_UP: WalkState_Accel,
                  SHIFT_DOWN: SleepState, SHIFT_UP: SleepState},
-    JumpState: {SPACE_DOWN: JumpState, SLEEP_TIMER: RunState_Accel}
+    JumpState: {SPACE_DOWN: JumpState, JUMP_TO_WALK: WalkState_Accel, JUMP_TO_IDLE: IdleState}
 }
 
 
@@ -304,7 +343,8 @@ class Character:
         self.image_s_idle = load_image('image/Mario_small idle 23x23.png')
         self.image_s_walk = load_image('image/Mario_small walk 25x25.png')
         self.image_s_run = load_image('image/Mario_small run 25x25.png')
-        self.x, self.y = 800 // 2, 90
+        self.image_s_jump = load_image('image/Mario_small jump 30x30.png')
+        self.x, self.y = 800 // 3, 50
         self.size_x, self.size_y = 50, 60
         self.dir = 1
         self.velocity = 0
@@ -312,7 +352,10 @@ class Character:
         self.frame_y = 0
         self.accel = 0
         self.timer = 0
-        self.jumphight = 0
+        self.jump_timer = 0
+        self.jump_power = 250
+        self.jstart_pos = 0
+        self.hight = 0
         self.event_que = []
         self.cur_state = IdleState
         self.cur_state.enter(self, None)
