@@ -98,6 +98,7 @@ def update():
         if Crash_Check(item, map):
             item.y = 30 + item.size_y // 2
 
+
     # delay(0.1)
 
 
