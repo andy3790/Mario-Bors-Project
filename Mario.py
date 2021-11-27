@@ -95,6 +95,7 @@ class WalkState_Accel:
         mario.dir = mario.velocity
         if mario.frame_x >= 9 or mario.frame_y >= 3:
             mario.frame_x, mario.frame_y = 0, 0
+        mario.accel = 0
         pass
 
     def exit(mario, event):
@@ -104,49 +105,6 @@ class WalkState_Accel:
         mario.x += mario.velocity * RUN_SPEED_PPS * game_framework.frame_time
 
         mario.frame_x = (mario.frame_x + WalkState_Accel.ONE_ACTION * game_framework.frame_time)
-        if mario.frame_x // 9 == 1:
-            mario.frame_y = (mario.frame_y + 1)
-            mario.frame_x = mario.frame_x % 9
-        if mario.frame_y >= 3:
-            mario.frame_x, mario.frame_y = 0, 0;
-        pass
-
-    def draw(mario):
-        if mario.dir == 1:
-            mario.image_s_walk.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, '', mario.x, mario.y, mario.size_x, mario.size_y)
-        else:
-            mario.image_s_walk.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, 'h', mario.x, mario.y, mario.size_x, mario.size_y)
-
-class WalkState_Dccel:
-    TIME_PER_ACTION = 0.8
-    ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
-    FRAMES_PER_ACTION = 27
-    ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
-
-    def enter(mario, event):
-        if event == RIGHT_DOWN:
-            mario.velocity += 1
-        elif event == LEFT_DOWN:
-            mario.velocity -= 1
-        elif event == RIGHT_UP:
-            mario.velocity -= 1
-        elif event == LEFT_UP:
-            mario.velocity += 1
-        mario.dir = mario.velocity
-        if mario.frame_x >= 9 or mario.frame_y >= 3:
-            mario.frame_x, mario.frame_y = 0, 0
-        pass
-
-    def exit(mario, event):
-        pass
-
-    def do(mario):
-        if -0.1 < mario.accel < 0.1:
-            mario.add_event(DCCEL_WALK)
-
-        mario.x += mario.velocity * RUN_SPEED_PPS * game_framework.frame_time
-
-        mario.frame_x = (mario.frame_x + WalkState_Dccel.ONE_ACTION * game_framework.frame_time)
         if mario.frame_x // 9 == 1:
             mario.frame_y = (mario.frame_y + 1)
             mario.frame_x = mario.frame_x % 9
@@ -202,48 +160,6 @@ class RunState_Accel:
         else:
             mario.image_s_run.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, 'h', mario.x, mario.y, mario.size_x, mario.size_y)
 
-class RunState_Dccel:
-    TIME_PER_ACTION = 0.5
-    ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
-    FRAMES_PER_ACTION = 20
-    ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
-
-    def enter(mario, event):
-        if event == RIGHT_DOWN:
-            mario.velocity += 1
-        elif event == LEFT_DOWN:
-            mario.velocity -= 1
-        elif event == RIGHT_UP:
-            mario.velocity -= 1
-        elif event == LEFT_UP:
-            mario.velocity += 1
-        mario.dir = mario.velocity
-        pass
-
-    def exit(mario, event):
-        pass
-
-    def do(mario):
-        mario.x += (mario.velocity + mario.accel) * 2 * RUN_SPEED_PPS * game_framework.frame_time
-        if -0.1 < mario.accel < 0.1:
-            mario.accel = 0
-        else:
-            mario.accel -= (mario.velocity / 100) * RUN_SPEED_PPS * game_framework.frame_time
-
-        mario.frame_x = (mario.frame_x + RunState_Dccel.ONE_ACTION * game_framework.frame_time)
-        if mario.frame_x // 7 == 1:
-            mario.frame_y = (mario.frame_y + 1)
-            mario.frame_x = mario.frame_x % 7
-        if mario.frame_y >= 2 and mario.frame_x >= 5:
-            mario.frame_x, mario.frame_y = 0, 0;
-        pass
-
-    def draw(mario):
-        if mario.dir == 1:
-            mario.image_s_run.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, '', mario.x, mario.y, mario.size_x, mario.size_y)
-        else:
-            mario.image_s_run.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, 'h', mario.x, mario.y, mario.size_x, mario.size_y)
-
 class DashState:
     def enter(mario, event):
         mario.dir = mario.velocity
@@ -286,8 +202,10 @@ class JumpState:
         mario.jump_timer += 1 * game_framework.frame_time
         mario.y = mario.jstart_pos + mario.hight
         if mario.velocity != 0:
-            mario.x += (mario.dir) * RUN_SPEED_PPS * game_framework.frame_time
+            mario.x += (mario.dir + mario.accel) * RUN_SPEED_PPS * game_framework.frame_time
         # print(mario.jump_timer)
+        mario.accel += (mario.velocity / 100) * RUN_SPEED_PPS * game_framework.frame_time
+        mario.accel = clamp(-0.8, mario.accel, 0.8)
 
         mario.frame_x = (mario.frame_x + RunState_Dccel.ONE_ACTION * game_framework.frame_time)
         if mario.frame_x // 7 == 1:

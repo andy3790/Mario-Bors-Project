@@ -1,3 +1,4 @@
+TileMap = [[]]
 mario = None
 enemys = []
 items = []
