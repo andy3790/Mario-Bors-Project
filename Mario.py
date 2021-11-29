@@ -240,12 +240,8 @@ next_state_table = {
                 SHIFT_UP: IdleState, SHIFT_DOWN: IdleState, SPACE_DOWN: JumpState},
     WalkState_Accel: {RIGHT_UP: IdleState, LEFT_UP: IdleState, LEFT_DOWN: IdleState, RIGHT_DOWN: IdleState,
                SHIFT_DOWN: RunState_Accel, SHIFT_UP: WalkState_Accel, SPACE_DOWN: JumpState},
-    # WalkState_Dccel: {RIGHT_UP: IdleState, LEFT_UP: IdleState, LEFT_DOWN: IdleState, RIGHT_DOWN: IdleState,
-    #                   SHIFT_DOWN: RunState_Accel, SHIFT_UP: WalkState_Accel, DCCEL_WALK: IdleState},
     RunState_Accel: {RIGHT_UP: IdleState, LEFT_UP: IdleState, LEFT_DOWN: IdleState, RIGHT_DOWN: IdleState,
                SHIFT_DOWN: WalkState_Accel, SHIFT_UP: WalkState_Accel, SPACE_DOWN: JumpState},
-    # RunState_Dccel: {RIGHT_UP: WalkState_Dccel, LEFT_UP: WalkState_Dccel, LEFT_DOWN: WalkState_Dccel, RIGHT_DOWN: WalkState_Dccel,
-    #                  SHIFT_DOWN: RunState_Accel, SHIFT_UP: WalkState_Dccel},
     SleepState: {LEFT_DOWN: WalkState_Accel, RIGHT_DOWN: WalkState_Accel, LEFT_UP: WalkState_Accel, RIGHT_UP: WalkState_Accel,
                  SHIFT_DOWN: SleepState, SHIFT_UP: SleepState},
     JumpState: {SPACE_DOWN: JumpState, JUMP_TO_WALK: WalkState_Accel, JUMP_TO_IDLE: IdleState}
