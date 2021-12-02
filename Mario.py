@@ -1,10 +1,10 @@
 from pico2d import *
 
 import game_framework
+from server import PIXEL_PER_METER
 
 
 # Character Run Speed
-PIXEL_PER_METER = (10.0 / 0.2) # 10 pixel 20 cm
 RUN_SPEED_KMPH = 10.0 # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
 RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
@@ -16,7 +16,7 @@ Gravity = 9.8 * PIXEL_PER_METER
 # ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 # FRAMES_PER_ACTION = 9
 
-RIGHT_DOWN, LEFT_DOWN, RIGHT_UP, LEFT_UP, SLEEP_TIMER,  SHIFT_DOWN, SHIFT_UP, SPACE_DOWN, DCCEL_WALK, DCCEL_RUN, JUMP_TO_IDLE, JUMP_TO_WALK  = range(12)
+RIGHT_DOWN, LEFT_DOWN, RIGHT_UP, LEFT_UP, SLEEP_TIMER,  SHIFT_DOWN, SHIFT_UP, SPACE_DOWN, JUMP_TO_IDLE, JUMP_TO_WALK  = range(10)
 
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RIGHT_DOWN,
@@ -207,7 +207,7 @@ class JumpState:
         mario.accel += (mario.velocity / 100) * RUN_SPEED_PPS * game_framework.frame_time
         mario.accel = clamp(-0.8, mario.accel, 0.8)
 
-        mario.frame_x = (mario.frame_x + RunState_Dccel.ONE_ACTION * game_framework.frame_time)
+        mario.frame_x = (mario.frame_x + RunState_Accel.ONE_ACTION * game_framework.frame_time)
         if mario.frame_x // 7 == 1:
             mario.frame_y = (mario.frame_y + 1)
             mario.frame_x = mario.frame_x % 7

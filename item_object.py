@@ -1,6 +1,6 @@
 from pico2d import *
 
-from Mario import PIXEL_PER_METER
+from server import PIXEL_PER_METER
 import game_framework
 
 MOVE_SPEED = 2 * PIXEL_PER_METER
