@@ -5,6 +5,7 @@ import os
 from pico2d import *
 import game_framework
 import game_world
+import title_state
 import server
 
 from Mario import Character
@@ -63,7 +64,8 @@ def handle_events():
         if event.type == SDL_QUIT:
             game_framework.quit()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
-                game_framework.quit()
+                # game_framework.quit()
+                game_framework.change_state(title_state)
         else:
             server.mario.handle_event(event)
 
