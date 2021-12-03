@@ -22,7 +22,6 @@ gAccel = 0
 
 
 
-
 def Crash_Check(a, b):
     left_a, bottom_a, right_a, top_a = a.get_bb()
     left_b, bottom_b, right_b, top_b = b.get_bb()
