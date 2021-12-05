@@ -98,6 +98,11 @@ def draw():
     clear_canvas()
     for game_object in game_world.all_objects():
         game_object.draw()
+    a = 800 / server.tileSize
+    b = 600 / server.tileSize
+    for i in range(int(a)):
+        for j in range(int(b)):
+            draw_rectangle(0+i*server.tileSize,0+j*server.tileSize,(1+i)*server.tileSize,(1+j)*server.tileSize)
     update_canvas()
 
 

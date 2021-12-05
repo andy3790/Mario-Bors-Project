@@ -1,10 +1,10 @@
 from pico2d import *
-from server import PIXEL_PER_METER
+import server
 
 import game_framework
 
 # Game object class here
-MOVE_SPEED = 1 * PIXEL_PER_METER
+MOVE_SPEED = 1 * server.PIXEL_PER_METER
 
 class Gomba:
     image = None
@@ -19,8 +19,8 @@ class Gomba:
         self.Right = False
         self.x = 600
         self.y = 20
-        self.size_x = 38
-        self.size_y = 44
+        self.size_x = server.tileSize / 6 * 5
+        self.size_y = server.tileSize / 6 * 5
 
     def get_bb(self):
         return self.x - 15, self.y - 15, self.x + 15, self.y + 15
@@ -58,8 +58,8 @@ class Turtle:
         self.Right = False
         self.x = 700
         self.y = 25
-        self.size_x = 40
-        self.size_y = 70
+        self.size_x = server.tileSize / 5 * 4
+        self.size_y = server.tileSize / 5 * 7
 
     def get_bb(self):
         return self.x - 13, self.y - 35, self.x + 13, self.y + 25

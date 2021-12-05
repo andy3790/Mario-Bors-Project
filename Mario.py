@@ -1,6 +1,7 @@
 from pico2d import *
 
 import game_framework
+import server
 from server import PIXEL_PER_METER
 
 
@@ -259,7 +260,7 @@ class Character:
         self.image_s_run = load_image('image/Mario_small run 25x25.png')
         self.image_s_jump = load_image('image/Mario_small jump 30x30.png')
         self.x, self.y = 800 // 3, 50
-        self.size_x, self.size_y = 50, 60
+        self.size_x, self.size_y = server.tileSize * 1.3, server.tileSize * 1.3
         self.dir = 1
         self.velocity = 0
         self.frame_x = 0
@@ -276,7 +277,7 @@ class Character:
         pass
 
     def get_bb(self):
-        return self.x - 13, self.y - 23, self.x + 13, self.y + 22
+        return self.x - 13, self.y - server.tileSize / 2, self.x + 13, self.y + server.tileSize / 2
 
     def add_event(self, event):
         self.event_que.insert(0, event)

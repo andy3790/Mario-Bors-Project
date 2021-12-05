@@ -1,9 +1,9 @@
 from pico2d import *
 
-from server import PIXEL_PER_METER
+import server
 import game_framework
 
-MOVE_SPEED = 2 * PIXEL_PER_METER
+MOVE_SPEED = 2 * server.PIXEL_PER_METER
 # Game object class here
 class Item_Mushroom:
     image = None
@@ -13,8 +13,8 @@ class Item_Mushroom:
         self.Right = False
         self.x = 100
         self.y = 15
-        self.size_x = 35
-        self.size_y = 35
+        self.size_x = server.tileSize / 5 * 3
+        self.size_y = server.tileSize / 5 * 3
 
     def get_bb(self):
         return self.x - 15, self.y - 15, self.x + 15, self.y + 15
@@ -48,8 +48,8 @@ class Item_Box:
         self.framey = 8
         self.x = sx
         self.y = sy
-        self.size_x = 30
-        self.size_y = 30
+        self.size_x = server.tileSize
+        self.size_y = server.tileSize
     def get_bb(self):
         return self.x - 15, self.y - 15, self.x + 15, self.y + 15
     def update(self):
