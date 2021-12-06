@@ -7,17 +7,17 @@ MOVE_SPEED = 2 * server.PIXEL_PER_METER
 # Game object class here
 class Item_Mushroom:
     image = None
-    def __init__(self):
+    def __init__(self, sx = 4, sy = 1):
         if Item_Mushroom.image == None:
             Item_Mushroom.image = load_image('image/mushroom.png')
         self.Right = False
-        self.x = 100
-        self.y = 15
+        self.x = sx * server.tileSize + server.tileSize / 2
+        self.y = sy * server.tileSize + server.tileSize / 2.5
         self.size_x = server.tileSize / 5 * 4
         self.size_y = server.tileSize / 5 * 4
 
     def get_bb(self):
-        return self.x - 15, self.y - 15, self.x + 15, self.y + 15
+        return self.x - self.size_x / 2, self.y - self.size_y / 2, self.x + self.size_x / 2, self.y + self.size_y / 2
 
     def update(self):
         if self.Right:
@@ -41,17 +41,17 @@ class Item_Box:
     ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
     FRAMES_PER_ACTION = 16
     ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
-    def __init__(self, sx = 400, sy = 50):
+    def __init__(self, sx = 4, sy = 1):
         if Item_Box.image == None:
             Item_Box.image = load_image('image/qblock_strips.png')
         self.framex = 0
         self.framey = 8
-        self.x = sx
-        self.y = sy
+        self.x = sx * server.tileSize + server.tileSize / 2
+        self.y = sy * server.tileSize + server.tileSize / 2
         self.size_x = server.tileSize
         self.size_y = server.tileSize
     def get_bb(self):
-        return self.x - 15, self.y - 15, self.x + 15, self.y + 15
+        return self.x - self.size_x / 2, self.y - self.size_y / 2, self.x + self.size_x / 2, self.y + self.size_y / 2
     def update(self):
         self.framex += Item_Box.ONE_ACTION * game_framework.frame_time
         if self.framex > 6:

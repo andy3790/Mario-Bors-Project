@@ -12,15 +12,15 @@ class Gomba:
     ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
     FRAMES_PER_ACTION = 8
     ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
-    def __init__(self):
+    def __init__(self, sx = 5, sy = 1):
         if Gomba.image == None:
             Gomba.image = load_image('image/gomba.png')
         self.frame = 0
         self.Right = False
-        self.x = 600
-        self.y = 20
-        self.size_x = server.tileSize / 6 * 5
-        self.size_y = server.tileSize / 6 * 5
+        self.x = sx * server.tileSize + server.tileSize / 2
+        self.y = sy * server.tileSize + server.tileSize / 2.3
+        self.size_x = server.tileSize
+        self.size_y = server.tileSize
 
     def get_bb(self):
         return self.x - 15, self.y - 15, self.x + 15, self.y + 15
@@ -51,14 +51,14 @@ class Turtle:
     ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
     FRAMES_PER_ACTION = 16
     ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
-    def __init__(self):
+    def __init__(self, sx = 6, sy = 1):
         if Turtle.image == None:
             Turtle.image = load_image('image/turtle.png')
         self.frame = 0
         self.Right = False
-        self.x = 700
-        self.y = 25
-        self.size_x = server.tileSize / 5 * 4
+        self.x = sx * server.tileSize + server.tileSize / 2
+        self.y = sy * server.tileSize + server.tileSize / 1.5
+        self.size_x = server.tileSize
         self.size_y = server.tileSize / 5 * 7
 
     def get_bb(self):
