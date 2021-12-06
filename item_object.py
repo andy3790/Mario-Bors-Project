@@ -13,8 +13,8 @@ class Item_Mushroom:
         self.Right = False
         self.x = 100
         self.y = 15
-        self.size_x = server.tileSize / 5 * 3
-        self.size_y = server.tileSize / 5 * 3
+        self.size_x = server.tileSize / 5 * 4
+        self.size_y = server.tileSize / 5 * 4
 
     def get_bb(self):
         return self.x - 15, self.y - 15, self.x + 15, self.y + 15
@@ -62,3 +62,4 @@ class Item_Box:
 
     def draw(self):
             self.image.clip_draw(int(self.framex) * 24, int(self.framey) * 24, 24, 24, self.x , self.y,self.size_x, self.size_y)
+            draw_rectangle(*self.get_bb())
