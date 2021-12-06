@@ -9,17 +9,13 @@ import title_state
 import server
 
 from Mario import Character
-from Mario import PIXEL_PER_METER
+from server import PIXEL_PER_METER
 import enemy_object
 import item_object
 import map_object
 
 
 name = "MainState"
-
-Gravity = 9.8 * PIXEL_PER_METER
-gAccel = 0
-
 
 
 def Crash_Check(a, b):
@@ -70,16 +66,11 @@ def handle_events():
 
 
 def update():
-    global gAccel
     for game_object in game_world.all_objects():
         game_object.update()
     # fill here
-    # mario.y -= gAccel * game_framework.frame_time
-    # if gAccel < 18:
-    #     gAccel += Gravity * game_framework.frame_time
     if Crash_Check(server.mario, server.map):
         server.mario.y = 29 + server.mario.size_y // 2
-        gAccel = 0
     for enemy in server.enemys:
         if Crash_Check(enemy, server.map):
             enemy.y = 30 + enemy.size_y // 2

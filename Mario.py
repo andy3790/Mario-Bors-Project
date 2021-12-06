@@ -14,7 +14,7 @@ RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 Gravity = 9.8 * PIXEL_PER_METER
 
 MARIO_MIN_JUMP_POWER = 150
-MARIO_MAX_JUMP_POWER = 450
+MARIO_MAX_JUMP_POWER = 600
 # Character Action Speed
 # TIME_PER_ACTION = 1.0
 # ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
@@ -251,6 +251,8 @@ class JumpState:
 
     def do(mario):
         mario.hight = 1
+        if mario.y <= mario.jstart_pos:
+            mario.hight = 0
         # mario.y = mario.jstart_pos + mario.hight
         mario.y += mario.jump_power * game_framework.frame_time
         # if mario.velocity != 0:
@@ -266,10 +268,7 @@ class JumpState:
         if mario.frame_y >= 3 and mario.frame_x >= 2:
             mario.frame_x, mario.frame_y = 2, 3;
 
-        if mario.y <= mario.jstart_pos:
-            mario.hight = 0
-            mario.y = mario.jstart_pos
-
+        if mario.hight == 0:
             if mario.velocity == 0:
                 mario.add_event(JUMP_TO_IDLE)
             else:
@@ -318,7 +317,7 @@ class Character:
         self.accel = 0
         self.timer = 0
         self.jump_timer = 0
-        self.jump_power = MARIO_MIN_JUMP_POWER   # 150 제일 낮은 점프 세기   300 일반적으로 가장 강한 점프      350 대쉬 점프
+        self.jump_power = MARIO_MIN_JUMP_POWER
         self.jstart_pos = 0
         self.hight = 0
         self.gaccel = 0
@@ -347,9 +346,9 @@ class Character:
                 self.cur_state = next_state_table[self.cur_state][event]
             self.cur_state.enter(self, event)
         self.gravity()
-        if self.y < 50:
+        if self.y < 70:
             self.gaccel = 0
-            self.y = 54
+            self.y = 70
         pass
 
     def draw(self):
