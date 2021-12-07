@@ -1,8 +1,10 @@
 from pico2d import *
 
 import game_framework
+import game_world
 import server
 from server import PIXEL_PER_METER
+from collision import Crash_Check
 
 
 # Character Run Speed
@@ -327,7 +329,7 @@ class Character:
         pass
 
     def get_bb(self):
-        return self.x - 13, self.y - server.tileSize / 2, self.x + 13, self.y + server.tileSize / 2
+        return self.x - 13, self.y - server.tileSize / 2, self.x + 13, self.y + server.tileSize / 2.5
 
     def add_event(self, event):
         self.event_que.insert(0, event)
@@ -346,9 +348,12 @@ class Character:
                 self.cur_state = next_state_table[self.cur_state][event]
             self.cur_state.enter(self, event)
         self.gravity()
-        if self.y < 70:
+        if self.y < server.tileSize + server.tileSize / 2:
             self.gaccel = 0
-            self.y = 70
+            self.y = server.tileSize + server.tileSize / 2
+        for lo in game_world.all_layer_objects(1):
+            if Crash_Check(server.mario, lo): #TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize)]
+                server.mario.y = lo.y + server.tileSize
         pass
 
     def draw(self):

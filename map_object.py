@@ -34,3 +34,29 @@ class Map_BackGround:
 
     def handle_event(self, event):
         pass
+
+
+class MapObjects:
+    image = None
+    def __init__(self, tx=0, ty=0, sx=0, sy=0):
+        if MapObjects.image == None:
+            MapObjects.image = load_image('image/Tilesets/0 Grassland.png')
+        self.tile_x = tx * 16
+        self.tile_y = ty * 16
+        self.x = sx * server.tileSize + server.tileSize / 2
+        self.y = sy * server.tileSize + server.tileSize / 2
+        self.size_x = server.tileSize
+        self.size_y = server.tileSize
+
+    def get_bb(self):
+        return self.x - self.size_x / 2, self.y - self.size_y / 2, self.x + self.size_x / 2, self.y + self.size_y / 2
+
+    def draw(self):
+            self.image.clip_draw(int(self.tile_x), int(self.tile_y), 16, 16, self.x , self.y,self.size_x, self.size_y)
+            draw_rectangle(*self.get_bb())
+
+    def update(self):
+        pass
+
+    def handle_event(self, event):
+        pass
