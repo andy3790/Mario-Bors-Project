@@ -16,7 +16,7 @@ RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 Gravity = 9.8 * PIXEL_PER_METER
 
 MARIO_MIN_JUMP_POWER = 150
-MARIO_MAX_JUMP_POWER = 600
+MARIO_MAX_JUMP_POWER = 800
 # Character Action Speed
 # TIME_PER_ACTION = 1.0
 # ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
@@ -81,9 +81,9 @@ class IdleState:
 
     def draw(mario):
         if mario.dir == 1:
-            mario.image_s_idle.clip_composite_draw(int(mario.frame_x) * 22, 199 - (int(mario.frame_y) * 22 + 23), 23, 23, 0, '', mario.x, mario.y, mario.size_x, mario.size_y)
+            mario.image_s_idle.clip_composite_draw(int(mario.frame_x) * 22, 199 - (int(mario.frame_y) * 22 + 23), 23, 23, 0, '', mario.x - server.cameraPos, mario.y, mario.size_x, mario.size_y)
         else:
-            mario.image_s_idle.clip_composite_draw(int(mario.frame_x) * 22, 199 - (int(mario.frame_y) * 22 + 23), 23, 23, 0, 'h', mario.x, mario.y, mario.size_x, mario.size_y)
+            mario.image_s_idle.clip_composite_draw(int(mario.frame_x) * 22, 199 - (int(mario.frame_y) * 22 + 23), 23, 23, 0, 'h', mario.x - server.cameraPos, mario.y, mario.size_x, mario.size_y)
 
 class WalkState_Accel:
     TIME_PER_ACTION = 0.8
@@ -122,9 +122,13 @@ class WalkState_Accel:
 
     def draw(mario):
         if mario.dir == 1:
-            mario.image_s_walk.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, '', mario.x, mario.y, mario.size_x, mario.size_y)
+            mario.image_s_walk.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, '', mario.x - server.cameraPos, mario.y, mario.size_x, mario.size_y)
         else:
-            mario.image_s_walk.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, 'h', mario.x, mario.y, mario.size_x, mario.size_y)
+            mario.image_s_walk.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, 'h', mario.x - server.cameraPos, mario.y, mario.size_x, mario.size_y)
+
+        if server.debugMod:
+            for i in range(-1,1+1):
+                draw_rectangle(int(mario.x / server.tileSize + mario.velocity) * server.tileSize - server.cameraPos, int(mario.y / server.tileSize + i) * server.tileSize, int(mario.x / server.tileSize + mario.velocity + 1) * server.tileSize - server.cameraPos, int(mario.y / server.tileSize + i + 1) * server.tileSize)
 
 class RunState_Accel:
     TIME_PER_ACTION = 0.5
@@ -164,9 +168,13 @@ class RunState_Accel:
 
     def draw(mario):
         if mario.dir == 1:
-            mario.image_s_run.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, '', mario.x, mario.y, mario.size_x, mario.size_y)
+            mario.image_s_run.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, '', mario.x - server.cameraPos, mario.y, mario.size_x, mario.size_y)
         else:
-            mario.image_s_run.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, 'h', mario.x, mario.y, mario.size_x, mario.size_y)
+            mario.image_s_run.clip_composite_draw(int(mario.frame_x) * 24, 73 - (int(mario.frame_y) * 24 + 25), 25, 25, 0, 'h', mario.x - server.cameraPos, mario.y, mario.size_x, mario.size_y)
+
+        if server.debugMod:
+            for i in range(-1,1+1):
+                draw_rectangle(int(mario.x / server.tileSize + mario.velocity) * server.tileSize - server.cameraPos, int(mario.y / server.tileSize + i) * server.tileSize, int(mario.x / server.tileSize + mario.velocity + 1) * server.tileSize - server.cameraPos, int(mario.y / server.tileSize + i + 1) * server.tileSize)
 
 class JumpPowerCheckState:
     TIME_PER_ACTION = 0.5
@@ -220,9 +228,13 @@ class JumpPowerCheckState:
 
     def draw(mario):
         if mario.velocity > 0:
-            mario.image_s_jump.clip_composite_draw(int(mario.frame_x) * 29, 146 - (int(mario.frame_y) * 29 + 30), 30, 30, 0, 'h', mario.x, mario.y, mario.size_x + 5, mario.size_y + 5)
+            mario.image_s_jump.clip_composite_draw(int(mario.frame_x) * 29, 146 - (int(mario.frame_y) * 29 + 30), 30, 30, 0, 'h', mario.x - server.cameraPos, mario.y, mario.size_x + 5, mario.size_y + 5)
         else:
-            mario.image_s_jump.clip_composite_draw(int(mario.frame_x) * 29, 146 - (int(mario.frame_y) * 29 + 30), 30, 30, 0, '', mario.x, mario.y, mario.size_x + 5, mario.size_y + 5)
+            mario.image_s_jump.clip_composite_draw(int(mario.frame_x) * 29, 146 - (int(mario.frame_y) * 29 + 30), 30, 30, 0, '', mario.x - server.cameraPos, mario.y, mario.size_x + 5, mario.size_y + 5)
+
+        if server.debugMod:
+            for i in range(-1,1+1):
+                draw_rectangle(int(mario.x / server.tileSize + mario.velocity) * server.tileSize - server.cameraPos, int(mario.y / server.tileSize + i) * server.tileSize, int(mario.x / server.tileSize + mario.velocity + 1) * server.tileSize - server.cameraPos, int(mario.y / server.tileSize + i + 1) * server.tileSize)
 
         pass
 
@@ -279,9 +291,13 @@ class JumpState:
 
     def draw(mario):
         if mario.velocity > 0:
-            mario.image_s_jump.clip_composite_draw(int(mario.frame_x) * 29, 146 - (int(mario.frame_y) * 29 + 30), 30, 30, 0, 'h', mario.x, mario.y, mario.size_x + 5, mario.size_y + 5)
+            mario.image_s_jump.clip_composite_draw(int(mario.frame_x) * 29, 146 - (int(mario.frame_y) * 29 + 30), 30, 30, 0, 'h', mario.x - server.cameraPos, mario.y, mario.size_x + 5, mario.size_y + 5)
         else:
-            mario.image_s_jump.clip_composite_draw(int(mario.frame_x) * 29, 146 - (int(mario.frame_y) * 29 + 30), 30, 30, 0, '', mario.x, mario.y, mario.size_x + 5, mario.size_y + 5)
+            mario.image_s_jump.clip_composite_draw(int(mario.frame_x) * 29, 146 - (int(mario.frame_y) * 29 + 30), 30, 30, 0, '', mario.x - server.cameraPos, mario.y, mario.size_x + 5, mario.size_y + 5)
+
+        if server.debugMod:
+            for i in range(-1,1+1):
+                draw_rectangle(int(mario.x / server.tileSize + mario.velocity) * server.tileSize - server.cameraPos, int(mario.y / server.tileSize + i) * server.tileSize, int(mario.x / server.tileSize + mario.velocity + 1) * server.tileSize - server.cameraPos, int(mario.y / server.tileSize + i + 1) * server.tileSize)
 
         pass
 
@@ -303,14 +319,14 @@ next_state_table = {
 class Character:
     image = None
 
-    def __init__(self):
+    def __init__(self, sx=0, sy=0):
         if Character.image == None:
             Character.image = load_image('image/NSMBSmallMario_Misc_.png')
         self.image_s_idle = load_image('image/Mario_small idle 23x23.png')
         self.image_s_walk = load_image('image/Mario_small walk 25x25.png')
         self.image_s_run = load_image('image/Mario_small run 25x25.png')
         self.image_s_jump = load_image('image/Mario_small jump 30x30.png')
-        self.x, self.y = 800 // 3, 50
+        self.x, self.y = sx * server.tileSize + server.tileSize / 2, sy * server.tileSize + server.tileSize / 2
         self.size_x, self.size_y = server.tileSize * 1.3, server.tileSize * 1.3
         self.dir = 1
         self.velocity = 0
@@ -336,11 +352,20 @@ class Character:
         pass
 
     def gravity(self):
-        self.gaccel += Gravity * game_framework.frame_time
+        self.gaccel += Gravity * 1.5 * game_framework.frame_time
         self.y -= self.gaccel * game_framework.frame_time
 
     def update(self):
         self.cur_state.do(self)
+        self.x = clamp(13, self.x, server.tileSize * 100)
+        for i in range(-1,1+1):
+            if Crash_Check(server.mario, server.TileMap[int(self.x / server.tileSize + self.velocity)][int(self.y / server.tileSize + i)]):
+                server.mario.x = server.TileMap[int(self.x / server.tileSize + self.velocity)][int(self.y / server.tileSize + i)].x + (server.tileSize / 2 + 13) * self.velocity * -1
+        if self.x - server.cameraPos < server.tileSize * 6:
+            server.cameraPos = clamp(server.MIN_CAMERA_POS, server.cameraPos - game_framework.frame_time * server.tileSize * (5 + self.accel*-5), server.MAX_CAMERA_POS)
+        elif self.x - server.cameraPos > server.tileSize * 10:
+            server.cameraPos = clamp(server.MIN_CAMERA_POS, server.cameraPos + game_framework.frame_time * server.tileSize * (5 + self.accel*5), server.MAX_CAMERA_POS)
+
         if len(self.event_que) > 0:
             event = self.event_que.pop()
             self.cur_state.exit(self, event)
@@ -348,19 +373,18 @@ class Character:
                 self.cur_state = next_state_table[self.cur_state][event]
             self.cur_state.enter(self, event)
         self.gravity()
-        if self.y < server.tileSize + server.tileSize / 2:
+        if Crash_Check(server.mario, server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)]):
             self.gaccel = 0
-            self.y = server.tileSize + server.tileSize / 2
-        for lo in game_world.all_layer_objects(1):
-            if Crash_Check(server.mario, lo): #TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize)]
-                server.mario.y = lo.y + server.tileSize
+            server.mario.y = server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)].y + (server.tileSize)
         pass
 
     def draw(self):
         self.cur_state.draw(self)
-        debug_print('Velocity :' + str(self.velocity) + ' Dir:' + str(self.dir) + ' State:' + str(self.cur_state))
 
-        draw_rectangle(*self.get_bb())
+        if server.debugMod:
+            debug_print('Velocity :' + str(self.velocity) + ' Dir:' + str(self.dir) + ' State:' + str(self.cur_state))
+            a1,a2,a3,a4 = self.get_bb()
+            draw_rectangle(a1 - server.cameraPos,a2,a3 - server.cameraPos,a4)
         pass
 
     def handle_event(self, event):

@@ -52,8 +52,11 @@ class MapObjects:
         return self.x - self.size_x / 2, self.y - self.size_y / 2, self.x + self.size_x / 2, self.y + self.size_y / 2
 
     def draw(self):
-            self.image.clip_draw(int(self.tile_x), int(self.tile_y), 16, 16, self.x , self.y,self.size_x, self.size_y)
-            draw_rectangle(*self.get_bb())
+            self.image.clip_draw(int(self.tile_x), int(self.tile_y), 16, 16, self.x - server.cameraPos , self.y,self.size_x, self.size_y)
+
+            if server.debugMod:
+                a1, a2, a3, a4 = self.get_bb()
+                draw_rectangle(a1 - server.cameraPos, a2, a3 - server.cameraPos, a4)
 
     def update(self):
         pass

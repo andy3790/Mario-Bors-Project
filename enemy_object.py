@@ -38,11 +38,13 @@ class Gomba:
 
     def draw(self):
         if self.Right:
-            self.image.clip_composite_draw(5, 32 * (27 - int(self.frame)) + 7, 19, 20, 0, 'h', self.x, self.y, self.size_x, self.size_y)
+            self.image.clip_composite_draw(5, 32 * (27 - int(self.frame)) + 7, 19, 20, 0, 'h', self.x - server.cameraPos, self.y, self.size_x, self.size_y)
         else:
-            self.image.clip_draw(5, 32 * (27 - int(self.frame)) + 7, 19, 20, self.x, self.y, self.size_x, self.size_y)
+            self.image.clip_draw(5, 32 * (27 - int(self.frame)) + 7, 19, 20, self.x - server.cameraPos, self.y, self.size_x, self.size_y)
 
-        draw_rectangle(*self.get_bb())
+        if server.debugMod:
+            a1, a2, a3, a4 = self.get_bb()
+            draw_rectangle(a1 - server.cameraPos, a2, a3 - server.cameraPos, a4)
 
 
 class Turtle:
@@ -62,7 +64,7 @@ class Turtle:
         self.size_y = server.tileSize / 5 * 7
 
     def get_bb(self):
-        return self.x - 13, self.y - 35, self.x + 13, self.y + 25
+        return self.x - 13, self.y - 25, self.x + 13, self.y + 25
 
     def update(self):
         self.frame = (self.frame + Turtle.ONE_ACTION * game_framework.frame_time) % 16
@@ -77,8 +79,10 @@ class Turtle:
 
     def draw(self):
         if self.Right:
-            self.image.clip_composite_draw(0,  32 * (41 - int(self.frame)) + 17, 20, 30, 0, 'h', self.x, self.y, self.size_x, self.size_y)
+            self.image.clip_composite_draw(0,  32 * (41 - int(self.frame)) + 17, 20, 30, 0, 'h', self.x - server.cameraPos, self.y, self.size_x, self.size_y)
         else:
-            self.image.clip_draw(0, 32 * (41 - int(self.frame)) + 17, 20, 30, self.x, self.y, self.size_x, self.size_y)
+            self.image.clip_draw(0, 32 * (41 - int(self.frame)) + 17, 20, 30, self.x - server.cameraPos, self.y, self.size_x, self.size_y)
 
-        draw_rectangle(*self.get_bb())
+        if server.debugMod:
+            a1, a2, a3, a4 = self.get_bb()
+            draw_rectangle(a1 - server.cameraPos, a2, a3 - server.cameraPos, a4)

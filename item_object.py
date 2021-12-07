@@ -30,9 +30,11 @@ class Item_Mushroom:
                 self.Right = True
 
     def draw(self):
-        self.image.draw(self.x,self.y, self.size_x, self.size_y)
+        self.image.draw(self.x - server.cameraPos,self.y, self.size_x, self.size_y)
 
-        draw_rectangle(*self.get_bb())
+        if server.debugMod:
+            a1, a2, a3, a4 = self.get_bb()
+            draw_rectangle(a1 - server.cameraPos, a2, a3 - server.cameraPos, a4)
 
 
 class Item_Box:
@@ -61,5 +63,8 @@ class Item_Box:
             self.framey = 8
 
     def draw(self):
-            self.image.clip_draw(int(self.framex) * 24, int(self.framey) * 24, 24, 24, self.x , self.y,self.size_x, self.size_y)
-            draw_rectangle(*self.get_bb())
+            self.image.clip_draw(int(self.framex) * 24, int(self.framey) * 24, 24, 24, self.x - server.cameraPos , self.y,self.size_x, self.size_y)
+
+            if server.debugMod:
+                a1, a2, a3, a4 = self.get_bb()
+                draw_rectangle(a1 - server.cameraPos, a2, a3 - server.cameraPos, a4)
