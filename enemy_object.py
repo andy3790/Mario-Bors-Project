@@ -91,24 +91,30 @@ class Turtle:
             return self.x - 13, self.y - 25, self.x + 13, self.y + 25
 
     def update(self):
-        self.frame = (self.frame + Turtle.ONE_ACTION * game_framework.frame_time) % 16
-        if self.Right:
-            self.x += MOVE_SPEED * game_framework.frame_time
-            if self.x > 800:
-                self.Right = False
+        if self.dmg:
+            self.frame = (self.frame + Turtle.ONE_ACTION / 16 * game_framework.frame_time) % 1 + 16
         else:
-            self.x -= MOVE_SPEED * game_framework.frame_time
-            if self.x < 0:
-                self.Right = True
+            self.frame = (self.frame + Turtle.ONE_ACTION * game_framework.frame_time) % 16
+            if self.Right:
+                self.x += MOVE_SPEED * game_framework.frame_time
+                if self.x > 800:
+                    self.Right = False
+            else:
+                self.x -= MOVE_SPEED * game_framework.frame_time
+                if self.x < 0:
+                    self.Right = True
 
     def damaged(self):
         self.dmg = True
 
     def draw(self):
-        if self.Right:
-            self.image.clip_composite_draw(0,  32 * (41 - int(self.frame)) + 17, 20, 30, 0, 'h', self.x - server.cameraPos, self.y, self.size_x, self.size_y)
+        if self.dmg:
+            self.image.clip_draw(0, 32 * (41 - int(self.frame)) + 17, 20, 15, self.x - server.cameraPos, self.y - self.size_y / 5, self.size_x, self.size_y / 2)
         else:
-            self.image.clip_draw(0, 32 * (41 - int(self.frame)) + 17, 20, 30, self.x - server.cameraPos, self.y, self.size_x, self.size_y)
+            if self.Right:
+                self.image.clip_composite_draw(0,  32 * (41 - int(self.frame)) + 17, 20, 30, 0, 'h', self.x - server.cameraPos, self.y, self.size_x, self.size_y)
+            else:
+                self.image.clip_draw(0, 32 * (41 - int(self.frame)) + 17, 20, 30, self.x - server.cameraPos, self.y, self.size_x, self.size_y)
 
         if server.debugMod:
             a1, a2, a3, a4 = self.get_bb()

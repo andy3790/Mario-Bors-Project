@@ -393,7 +393,9 @@ class Character:
             server.mario.y = server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)].y + (server.tileSize)
             self.jstart_pos = server.mario.y
         for ob in game_world.all_layer_objects(4):
-            if Crash_Check(server.mario, ob):
+            if Crash_Check(server.mario, ob) and self.cur_state == JumpState:
+                self.gaccel = 0
+                self.jump_power = 200
                 ob.damaged()
 
         pass
