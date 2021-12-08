@@ -3,6 +3,7 @@ import server
 
 import game_framework
 import game_world
+from collision import Crash_Check
 
 # Game object class here
 MOVE_SPEED = 1 * server.PIXEL_PER_METER
@@ -44,12 +45,13 @@ class Gomba:
             self.frame = (self.frame + Gomba.ONE_ACTION * game_framework.frame_time) % 8
             if self.Right:
                 self.x += MOVE_SPEED * game_framework.frame_time
-                if self.x > 800:
-                    self.Right = False
             else:
                 self.x -= MOVE_SPEED * game_framework.frame_time
-                if self.x < 0:
-                    self.Right = True
+
+            self.y -= server.tileSize
+            if not Crash_Check(self, server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)]):
+                self.Right = not self.Right
+            self.y += server.tileSize
 
     def damaged(self):
         self.dmg = True
@@ -97,12 +99,13 @@ class Turtle:
             self.frame = (self.frame + Turtle.ONE_ACTION * game_framework.frame_time) % 16
             if self.Right:
                 self.x += MOVE_SPEED * game_framework.frame_time
-                if self.x > 800:
-                    self.Right = False
             else:
                 self.x -= MOVE_SPEED * game_framework.frame_time
-                if self.x < 0:
-                    self.Right = True
+
+            self.y -= server.tileSize
+            if not Crash_Check(self, server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)]):
+                self.Right = not self.Right
+            self.y += server.tileSize
 
     def damaged(self):
         self.dmg = True

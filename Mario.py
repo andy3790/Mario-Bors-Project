@@ -21,7 +21,7 @@ MARIO_MAX_JUMP_POWER = 800
 # ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 # FRAMES_PER_ACTION = 9
 
-RIGHT_DOWN, LEFT_DOWN, RIGHT_UP, LEFT_UP, SLEEP_TIMER,  SHIFT_DOWN, SHIFT_UP, SPACE_DOWN, SPACE_UP, JUMP_TO_IDLE, JUMP_TO_WALK, CHECK_TO_JUMP  = range(12)
+RIGHT_DOWN, LEFT_DOWN, RIGHT_UP, LEFT_UP, SLEEP_TIMER,  SHIFT_DOWN, SHIFT_UP, SPACE_DOWN, SPACE_UP, JUMP_TO_IDLE, JUMP_TO_WALK, CHECK_TO_JUMP, GAME_OVER  = range(13)
 
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RIGHT_DOWN,
@@ -300,21 +300,54 @@ class JumpState:
         if server.debugMod:
             for i in range(-1,1+1):
                 draw_rectangle(int(mario.x / server.tileSize + mario.velocity) * server.tileSize - server.cameraPos, int(mario.y / server.tileSize + i) * server.tileSize, int(mario.x / server.tileSize + mario.velocity + 1) * server.tileSize - server.cameraPos, int(mario.y / server.tileSize + i + 1) * server.tileSize)
-
         pass
 
 
+
+class GameOverState:
+    TIME_PER_ACTION = 0.5
+    ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+    FRAMES_PER_ACTION = 13
+    ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
+
+    def enter(mario, event):
+        mario.jstart_pos = 0
+        mario.y = 1
+        mario.frame_x = 0
+        mario.frame_y = 0
+        mario.jump_timer = 0
+        mario.jump_power = 400
+        pass
+
+    def exit(mario, event):
+        pass
+
+    def do(mario):
+        mario.hight = (mario.jump_timer * mario.jump_timer * (-Gravity) / 2) + (mario.jump_timer * mario.jump_power)
+        mario.jump_timer += 1 * game_framework.frame_time
+        mario.y = mario.jstart_pos + mario.hight
+
+        mario.frame_x = (mario.frame_x + GameOverState.ONE_ACTION * game_framework.frame_time) % 13
+
+        if mario.y < 0:
+            print("GameOverCheck!")
+        pass
+
+    def draw(mario):
+        mario.image_s_game_over.clip_composite_draw(int(mario.frame_x) * 29, 0, 30, 30, 0, '', mario.x - server.cameraPos, mario.y, mario.size_x + 5, mario.size_y + 5)
+        pass
+
 next_state_table = {
     IdleState: {RIGHT_UP: WalkState_Accel, LEFT_UP: WalkState_Accel, RIGHT_DOWN: WalkState_Accel, LEFT_DOWN: WalkState_Accel, SLEEP_TIMER: SleepState,
-                SHIFT_UP: IdleState, SHIFT_DOWN: IdleState, SPACE_DOWN: JumpPowerCheckState},
+                SHIFT_UP: IdleState, SHIFT_DOWN: IdleState, SPACE_DOWN: JumpPowerCheckState, GAME_OVER: GameOverState},
     WalkState_Accel: {RIGHT_UP: IdleState, LEFT_UP: IdleState, LEFT_DOWN: IdleState, RIGHT_DOWN: IdleState,
-               SHIFT_DOWN: RunState_Accel, SHIFT_UP: WalkState_Accel, SPACE_DOWN: JumpPowerCheckState},
+               SHIFT_DOWN: RunState_Accel, SHIFT_UP: WalkState_Accel, SPACE_DOWN: JumpPowerCheckState, GAME_OVER: GameOverState},
     RunState_Accel: {RIGHT_UP: IdleState, LEFT_UP: IdleState, LEFT_DOWN: IdleState, RIGHT_DOWN: IdleState,
-               SHIFT_DOWN: WalkState_Accel, SHIFT_UP: WalkState_Accel, SPACE_DOWN: JumpPowerCheckState},
+               SHIFT_DOWN: WalkState_Accel, SHIFT_UP: WalkState_Accel, SPACE_DOWN: JumpPowerCheckState, GAME_OVER: GameOverState},
     SleepState: {LEFT_DOWN: WalkState_Accel, RIGHT_DOWN: WalkState_Accel, LEFT_UP: WalkState_Accel, RIGHT_UP: WalkState_Accel,
-                 SHIFT_DOWN: SleepState, SHIFT_UP: SleepState},
-    JumpPowerCheckState: {SPACE_DOWN: JumpState, SPACE_UP: JumpState, CHECK_TO_JUMP: JumpState},
-    JumpState: {SPACE_DOWN: JumpState, JUMP_TO_WALK: WalkState_Accel, JUMP_TO_IDLE: IdleState}
+                 SHIFT_DOWN: SleepState, SHIFT_UP: SleepState, GAME_OVER: GameOverState},
+    JumpPowerCheckState: {SPACE_DOWN: JumpState, SPACE_UP: JumpState, CHECK_TO_JUMP: JumpState, GAME_OVER: GameOverState},
+    JumpState: {SPACE_DOWN: JumpState, JUMP_TO_WALK: WalkState_Accel, JUMP_TO_IDLE: IdleState, GAME_OVER: GameOverState}
 }
 
 
@@ -328,8 +361,10 @@ class Character:
         self.image_s_walk = load_image('image/Mario_small walk 25x25.png')
         self.image_s_run = load_image('image/Mario_small run 25x25.png')
         self.image_s_jump = load_image('image/Mario_small jump 30x30.png')
+        self.image_s_game_over = load_image('image/Mario_small GameOver 30x30.png')
         self.x, self.y = sx * server.tileSize + server.tileSize / 2, sy * server.tileSize + server.tileSize / 2
         self.size_x, self.size_y = server.tileSize * 1.3, server.tileSize * 1.3
+        self.hp = 1
         self.dir = 1
         self.velocity = 0
         self.frame_x = 0
@@ -360,43 +395,56 @@ class Character:
     def update(self):
         self.cur_state.do(self)
         self.x = clamp(13, self.x, server.tileSize * 100)
+        if self.cur_state != GameOverState:
+            for i in range(-1,1+1):
+                # 전방 충돌체크
+                if Crash_Check(server.mario, server.TileMap[int(self.x / server.tileSize + self.velocity)][int(self.y / server.tileSize + i)]):
+                    server.mario.x = server.TileMap[int(self.x / server.tileSize + self.velocity)][int(self.y / server.tileSize + i)].x + (server.tileSize / 2 + 13) * self.velocity * -1
+                # 상단 충돌체크
+                if Crash_Check(server.mario, server.TileMap[int(self.x / server.tileSize + i)][int(self.y / server.tileSize + 1)]):
+                    server.mario.y = server.TileMap[int(self.x / server.tileSize + i)][int(self.y / server.tileSize + 1)].y - (server.tileSize)
+                    server.TileMap[int(self.x / server.tileSize + i)][int(self.y / server.tileSize + 1)].hit()
+                    self.add_event(CHECK_TO_JUMP)
 
-        for i in range(-1,1+1):
-            # 상단 충돌체크
-            if Crash_Check(server.mario, server.TileMap[int(self.x / server.tileSize + i)][int(self.y / server.tileSize + 1)]):
-                server.mario.y = server.TileMap[int(self.x / server.tileSize + i)][int(self.y / server.tileSize + 1)].y - (server.tileSize)
-                server.TileMap[int(self.x / server.tileSize + i)][int(self.y / server.tileSize + 1)].hit()
-                self.add_event(CHECK_TO_JUMP)
-            # 전방 충돌체크
-            if Crash_Check(server.mario, server.TileMap[int(self.x / server.tileSize + self.velocity)][int(self.y / server.tileSize + i)]):
-                server.mario.x = server.TileMap[int(self.x / server.tileSize + self.velocity)][int(self.y / server.tileSize + i)].x + (server.tileSize / 2 + 13) * self.velocity * -1
+            for enemy in game_world.all_layer_objects(4):
+                if Crash_Check(server.mario, enemy):
+                    self.hp -= 1
+                    if self.hp <= 0:
+                        self.add_event(GAME_OVER)
+                        # print("damage!")
 
-        if self.x - server.cameraPos < server.tileSize * 6:
-            server.cameraPos = clamp(server.MIN_CAMERA_POS, server.cameraPos - game_framework.frame_time * server.tileSize * (5 + self.accel*-5), server.MAX_CAMERA_POS)
-        elif self.x - server.cameraPos > server.tileSize * 10:
-            server.cameraPos = clamp(server.MIN_CAMERA_POS, server.cameraPos + game_framework.frame_time * server.tileSize * (5 + self.accel*5), server.MAX_CAMERA_POS)
+            if self.x - server.cameraPos < server.tileSize * 6:
+                server.cameraPos = clamp(server.MIN_CAMERA_POS, server.cameraPos - game_framework.frame_time * server.tileSize * (5 + self.accel*-5), server.MAX_CAMERA_POS)
+            elif self.x - server.cameraPos > server.tileSize * 10:
+                server.cameraPos = clamp(server.MIN_CAMERA_POS, server.cameraPos + game_framework.frame_time * server.tileSize * (5 + self.accel*5), server.MAX_CAMERA_POS)
 
-        if len(self.event_que) > 0:
-            event = self.event_que.pop()
-            self.cur_state.exit(self, event)
-            if event in next_state_table[self.cur_state]:
-                self.cur_state = next_state_table[self.cur_state][event]
-            self.cur_state.enter(self, event)
-        self.gravity()
+            if len(self.event_que) > 0:
+                event = self.event_que.pop()
+                self.cur_state.exit(self, event)
+                if event in next_state_table[self.cur_state]:
+                    self.cur_state = next_state_table[self.cur_state][event]
+                self.cur_state.enter(self, event)
+            self.gravity()
 
-        if self.y <= 0:
-            print("gameOver")
+            if self.y <= 0:
+                self.add_event(GAME_OVER)
+                self.y = server.tileSize
+                # print("gameOver")
 
-        # 하단 충돌체크
-        elif Crash_Check(server.mario, server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)]):
-            self.gaccel = 0
-            server.mario.y = server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)].y + (server.tileSize)
-            self.jstart_pos = server.mario.y
-        for ob in game_world.all_layer_objects(4):
-            if Crash_Check(server.mario, ob) and self.cur_state == JumpState:
+            # 하단 충돌체크
+            elif Crash_Check(server.mario, server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)]):
                 self.gaccel = 0
-                self.jump_power = 200
-                ob.damaged()
+                server.mario.y = server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)].y + (server.tileSize)
+                self.jstart_pos = server.mario.y
+            for ob in game_world.all_layer_objects(4):
+                if Crash_Check(server.mario, ob) and self.cur_state == JumpState:
+                    self.gaccel = 0
+                    self.jump_power = 200
+                    ob.damaged()
+
+            for item in game_world.all_layer_objects(3):
+                if Crash_Check(server.mario, item):
+                    pass
 
         pass
 

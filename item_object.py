@@ -177,13 +177,11 @@ class Crash_Block:
 
 
     def hit(self):
-        game_world.remove_object(self)
         for o in server.blocks:
             if o == self:
                 server.blocks.remove(o)
-        server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize)] = 0
-
-
+                server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize)] = 0
+                game_world.remove_object(o)
 
     def draw(self):
             self.image.clip_draw(int(self.framex) * 24, int(self.framey) * 24, 24, 24, self.x - server.cameraPos , self.y,self.size_x, self.size_y)

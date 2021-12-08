@@ -70,18 +70,6 @@ def update():
     for game_object in game_world.all_objects():
         game_object.update()
     # fill here
-    if Crash_Check(server.mario, server.map):
-        server.mario.y = 29 + server.mario.size_y // 2
-    for enemy in server.enemys:
-        if Crash_Check(enemy, server.map):
-            enemy.y = 30 + enemy.size_y // 2
-        for lo in game_world.all_layer_objects(1):
-            if Crash_Check(enemy, lo):
-                enemy.Right = not enemy.Right
-                enemy.update()
-    for item in server.items:
-        if Crash_Check(item, server.map):
-            item.y = 30 + item.size_y // 2
 
 
     # delay(0.1)
