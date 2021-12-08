@@ -193,7 +193,7 @@ class JumpPowerCheckState:
         if mario.hight == 0:
             mario.jump_power = MARIO_MAX_JUMP_POWER
             mario.jump_timer = 0
-            mario.jstart_pos = mario.y
+            mario.jstart_pos = 0
             mario.hight = 0
             mario.dir = mario.velocity
         else:
@@ -376,6 +376,8 @@ class Character:
         if Crash_Check(server.mario, server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)]):
             self.gaccel = 0
             server.mario.y = server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)].y + (server.tileSize)
+            self.jstart_pos = server.mario.y
+
         pass
 
     def draw(self):
