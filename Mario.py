@@ -4,6 +4,7 @@ import game_framework
 import game_world
 import server
 from server import PIXEL_PER_METER
+from server import Gravity
 from collision import Crash_Check
 
 
@@ -12,8 +13,6 @@ RUN_SPEED_KMPH = 10.0 # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
 RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
 RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
-
-Gravity = 9.8 * PIXEL_PER_METER
 
 MARIO_MIN_JUMP_POWER = 150
 MARIO_MAX_JUMP_POWER = 800
@@ -233,6 +232,7 @@ class JumpPowerCheckState:
             mario.image_s_jump.clip_composite_draw(int(mario.frame_x) * 29, 146 - (int(mario.frame_y) * 29 + 30), 30, 30, 0, '', mario.x - server.cameraPos, mario.y, mario.size_x + 5, mario.size_y + 5)
 
         if server.debugMod:
+            draw_rectangle(int(mario.x / server.tileSize) * server.tileSize - server.cameraPos, int(mario.y / server.tileSize + 1) * server.tileSize, int(mario.x / server.tileSize + 1) * server.tileSize - server.cameraPos, int(mario.y / server.tileSize + 1 + 1) * server.tileSize)
             for i in range(-1,1+1):
                 draw_rectangle(int(mario.x / server.tileSize + mario.velocity) * server.tileSize - server.cameraPos, int(mario.y / server.tileSize + i) * server.tileSize, int(mario.x / server.tileSize + mario.velocity + 1) * server.tileSize - server.cameraPos, int(mario.y / server.tileSize + i + 1) * server.tileSize)
 
@@ -358,9 +358,17 @@ class Character:
     def update(self):
         self.cur_state.do(self)
         self.x = clamp(13, self.x, server.tileSize * 100)
+
         for i in range(-1,1+1):
+            # 상단 충돌체크
+            if Crash_Check(server.mario, server.TileMap[int(self.x / server.tileSize + i)][int(self.y / server.tileSize + 1)]):
+                server.mario.y = server.TileMap[int(self.x / server.tileSize + i)][int(self.y / server.tileSize + 1)].y - (server.tileSize)
+                server.TileMap[int(self.x / server.tileSize + i)][int(self.y / server.tileSize + 1)].hit()
+                self.add_event(CHECK_TO_JUMP)
+            # 전방 충돌체크
             if Crash_Check(server.mario, server.TileMap[int(self.x / server.tileSize + self.velocity)][int(self.y / server.tileSize + i)]):
                 server.mario.x = server.TileMap[int(self.x / server.tileSize + self.velocity)][int(self.y / server.tileSize + i)].x + (server.tileSize / 2 + 13) * self.velocity * -1
+
         if self.x - server.cameraPos < server.tileSize * 6:
             server.cameraPos = clamp(server.MIN_CAMERA_POS, server.cameraPos - game_framework.frame_time * server.tileSize * (5 + self.accel*-5), server.MAX_CAMERA_POS)
         elif self.x - server.cameraPos > server.tileSize * 10:
@@ -373,7 +381,12 @@ class Character:
                 self.cur_state = next_state_table[self.cur_state][event]
             self.cur_state.enter(self, event)
         self.gravity()
-        if Crash_Check(server.mario, server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)]):
+
+        if self.y <= 0:
+            print("gameOver")
+
+        # 하단 충돌체크
+        elif Crash_Check(server.mario, server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)]):
             self.gaccel = 0
             server.mario.y = server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)].y + (server.tileSize)
             self.jstart_pos = server.mario.y

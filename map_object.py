@@ -58,6 +58,9 @@ class MapObjects:
                 a1, a2, a3, a4 = self.get_bb()
                 draw_rectangle(a1 - server.cameraPos, a2, a3 - server.cameraPos, a4)
 
+    def hit(self):
+        pass
+
     def update(self):
         pass
 
