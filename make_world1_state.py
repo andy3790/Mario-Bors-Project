@@ -38,8 +38,10 @@ def enter():
         server.TileMap[i][0] = server.mapObjects[-1]
     server.mapObjects.append(map_object.MapObjects(0, 5, 6, 4))
     server.TileMap[6][4] = server.mapObjects[-1]
-    game_world.add_objects(server.mapObjects, 1)
+    server.items.append(item_object.Coin(4,2))
+
     game_world.add_object(server.map, 0)
+    game_world.add_objects(server.mapObjects, 1)
     game_world.add_object(server.itemBox, 2)
     game_world.add_objects(server.blocks, 2)
     game_world.add_objects(server.items, 3)

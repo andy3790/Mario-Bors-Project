@@ -38,6 +38,7 @@ class Map_BackGround:
 
 class MapObjects:
     image = None
+
     def __init__(self, tx=0, ty=0, sx=0, sy=0):
         if MapObjects.image == None:
             MapObjects.image = load_image('image/Tilesets/0 Grassland.png')

@@ -12,6 +12,7 @@ MOVE_SPEED = 2 * server.PIXEL_PER_METER
 # Game object class here
 class Item_Mushroom:
     image = None
+
     def __init__(self, sx = 4, sy = 1):
         if Item_Mushroom.image == None:
             Item_Mushroom.image = load_image('image/mushroom.png')
@@ -70,6 +71,7 @@ class Item_Box:
     ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
     FRAMES_PER_ACTION = 16
     ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
+
     def __init__(self, sx = 4, sy = 1):
         if Item_Box.image == None:
             Item_Box.image = load_image('image/qblock_strips.png')
@@ -119,15 +121,10 @@ class Item_Box:
 
 class Coin:
     image = None
-    TIME_PER_ACTION = 1.0
-    ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
-    FRAMES_PER_ACTION = 16
-    ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
+
     def __init__(self, sx, sy):
         if Coin.image == None:
-            Coin.image = load_image('image/qblock_strips.png')
-        self.framex = 0
-        self.framey = 8
+            Coin.image = load_image('image/coin.png')
         self.x = sx * server.tileSize + server.tileSize / 2
         self.y = sy * server.tileSize + server.tileSize / 2
         self.size_x = server.tileSize
@@ -135,18 +132,13 @@ class Coin:
     def get_bb(self):
         return self.x - self.size_x / 2, self.y - self.size_y / 2, self.x + self.size_x / 2, self.y + self.size_y / 2
     def update(self):
-        self.framex += Item_Box.ONE_ACTION * game_framework.frame_time
-        if self.framex > 6:
-            self.framex = 0
-            self.framey -= 1
-        if self.framey == 6:
-            self.framey = 8
+        pass
 
     def hit(self):
         print("hitbox")
 
     def draw(self):
-            self.image.clip_draw(int(self.framex) * 24, int(self.framey) * 24, 24, 24, self.x - server.cameraPos , self.y,self.size_x, self.size_y)
+            self.image.clip_draw(0, 0, 40, 40, self.x - server.cameraPos , self.y,self.size_x, self.size_y)
 
             if server.debugMod:
                 a1, a2, a3, a4 = self.get_bb()
@@ -159,6 +151,7 @@ class Crash_Block:
     ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
     FRAMES_PER_ACTION = 4
     ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
+
     def __init__(self, sx = 4, sy = 1):
         if Crash_Block.image == None:
             Crash_Block.image = load_image('image/qblock_strips.png')

@@ -180,6 +180,7 @@ class JumpPowerCheckState:
     ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
     FRAMES_PER_ACTION = 30
     ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
+
     def enter(mario, event):
         if event == RIGHT_DOWN:
             mario.velocity += 1
@@ -243,6 +244,7 @@ class JumpState:
     ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
     FRAMES_PER_ACTION = 30
     ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
+
     def enter(mario, event):
         if event == RIGHT_DOWN:
             mario.velocity += 1
@@ -390,6 +392,9 @@ class Character:
             self.gaccel = 0
             server.mario.y = server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)].y + (server.tileSize)
             self.jstart_pos = server.mario.y
+        for ob in game_world.all_layer_objects(4):
+            if Crash_Check(server.mario, ob):
+                ob.damaged()
 
         pass
 

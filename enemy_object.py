@@ -2,6 +2,7 @@ from pico2d import *
 import server
 
 import game_framework
+import game_world
 
 # Game object class here
 MOVE_SPEED = 1 * server.PIXEL_PER_METER
@@ -12,6 +13,7 @@ class Gomba:
     ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
     FRAMES_PER_ACTION = 8
     ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
+
     def __init__(self, sx = 5, sy = 1):
         if Gomba.image == None:
             Gomba.image = load_image('image/gomba.png')
@@ -21,20 +23,37 @@ class Gomba:
         self.y = sy * server.tileSize + server.tileSize / 2.3
         self.size_x = server.tileSize
         self.size_y = server.tileSize
+        self.dmg = False
 
     def get_bb(self):
-        return self.x - 15, self.y - 15, self.x + 15, self.y + 15
+        if self.dmg:
+            return 0, 0, 0, 0
+        else:
+            return self.x - 15, self.y - 15, self.x + 15, self.y + 15
 
     def update(self):
-        self.frame = (self.frame + Gomba.ONE_ACTION * game_framework.frame_time) % 8
-        if self.Right:
-            self.x += MOVE_SPEED * game_framework.frame_time
-            if self.x > 800:
-                self.Right = False
+        if self.dmg:
+            self.frame += (Gomba.ONE_ACTION / 4 * game_framework.frame_time)
+            if self.frame > 9:
+                game_world.remove_object(self)
+                for e in server.enemys:
+                    if e == self:
+                        server.enemys.remove(e)
+            pass
         else:
-            self.x -= MOVE_SPEED * game_framework.frame_time
-            if self.x < 0:
-                self.Right = True
+            self.frame = (self.frame + Gomba.ONE_ACTION * game_framework.frame_time) % 8
+            if self.Right:
+                self.x += MOVE_SPEED * game_framework.frame_time
+                if self.x > 800:
+                    self.Right = False
+            else:
+                self.x -= MOVE_SPEED * game_framework.frame_time
+                if self.x < 0:
+                    self.Right = True
+
+    def damaged(self):
+        self.dmg = True
+        self.frame = 8
 
     def draw(self):
         if self.Right:
@@ -53,6 +72,7 @@ class Turtle:
     ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
     FRAMES_PER_ACTION = 16
     ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
+
     def __init__(self, sx = 6, sy = 1):
         if Turtle.image == None:
             Turtle.image = load_image('image/turtle.png')
@@ -62,9 +82,13 @@ class Turtle:
         self.y = sy * server.tileSize + server.tileSize / 1.5
         self.size_x = server.tileSize
         self.size_y = server.tileSize / 5 * 7
+        self.dmg = False
 
     def get_bb(self):
-        return self.x - 13, self.y - 25, self.x + 13, self.y + 25
+        if self.dmg:
+            return 0, 0, 0, 0
+        else:
+            return self.x - 13, self.y - 25, self.x + 13, self.y + 25
 
     def update(self):
         self.frame = (self.frame + Turtle.ONE_ACTION * game_framework.frame_time) % 16
@@ -76,6 +100,9 @@ class Turtle:
             self.x -= MOVE_SPEED * game_framework.frame_time
             if self.x < 0:
                 self.Right = True
+
+    def damaged(self):
+        self.dmg = True
 
     def draw(self):
         if self.Right:
