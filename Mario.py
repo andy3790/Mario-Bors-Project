@@ -455,6 +455,7 @@ class Character:
                         if self.hp <= 0:
                             self.sound_life_lost.play(1)
                             self.add_event(GAME_OVER)
+                            self.life -= 1
                             # print("damage!")
                         else:
                             self.invincibility_timer = 2

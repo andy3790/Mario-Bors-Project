@@ -31,7 +31,7 @@ def enter():
     server.items.clear()
     server.mapObjects.clear()
 
-    server.mario = Mario.Character(0, 2)
+    server.mario = Mario.Character(0, 4)
     server.map = map_object.Map_BackGround()
 
     for i in range(53):

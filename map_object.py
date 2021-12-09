@@ -1,5 +1,7 @@
 from pico2d import *
 
+import game_framework
+import game_world
 import server
 
 # Game object class here
@@ -8,7 +10,12 @@ class Map_BackGround:
     def __init__(self):
         self.image = load_image('image/1-1_background.png')
         self.bgm = load_music('sound/overworld.mp3')
+        self.bgm_hurry = load_music('sound/hurry-up.mp3')
+        self.font = load_font('ENCR10B.TTF', 18)
         self.bgm.set_volume(server.bgm_volume)
+        self.bgm_hurry.set_volume(server.bgm_volume)
+        self.check_hurry = True
+        self.check_replay = False
         self.bgm.repeat_play()
         self.canvas_width = get_canvas_width()
         self.canvas_height = get_canvas_height()
@@ -17,6 +24,7 @@ class Map_BackGround:
         self.h = self.image.h
         self.q1l, self.q1b, self.q1w, self.q1h = 0,0,0,0
         self.q2l, self.q2b, self.q2w, self.q2h = 0,0,0,0
+        self.gameTimer = 500
 
     def get_bb(self):
         return 0, 0, 800, 35
@@ -24,8 +32,24 @@ class Map_BackGround:
     def draw(self):
         self.image.clip_draw_to_origin(self.q1l, self.q1b, self.q1w, self.q1h, 0, 0)                        # quadrant 1
         self.image.clip_draw_to_origin(self.q2l, self.q2b, self.q2w, self.q2h, self.q1w, 0)                 # quadrant 2
+        self.font.draw(self.canvas_width - 130, self.canvas_height - 20, 'Time: %3.0f' % self.gameTimer, (0,0,0))
+        # self.font.draw(5, self.canvas_height - 20, 'Life:%2d' % server.mario.life, (0,0,0))
+        self.font.draw(100, self.canvas_height - 20, 'Coin:%2d' % server.mario.coin, (255,255,0))
 
     def update(self):
+        self.gameTimer -= game_framework.frame_time
+        if self.check_hurry:
+            if self.gameTimer <= 100:
+                self.check_hurry = False
+                self.bgm_hurry.play(1)
+                self.check_replay = True
+        if self.check_replay:
+            if self.gameTimer <= 97:
+                self.check_replay = False
+                self.bgm.repeat_play()
+        if self.gameTimer <= 0:
+            server.mario.hp = 0
+            game_world.add_object(MapObjects(100,100,int(server.mario.x /server.tileSize),int(server.mario.y / server.tileSize)),4)
         self.x = server.mario.x
         self.y = server.mario.y
         # quadrant 1

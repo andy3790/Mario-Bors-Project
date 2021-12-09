@@ -171,6 +171,7 @@ class Coin:
                 if o == self:
                     server.items.remove(o)
                     game_world.remove_object(o)
+                    server.mario.coin += 1
 
 
         pass
