@@ -10,6 +10,7 @@ MOVE_SPEED = 1 * server.PIXEL_PER_METER
 
 class Gomba:
     image = None
+    damage_sound = None
     TIME_PER_ACTION = 1.0
     ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
     FRAMES_PER_ACTION = 8
@@ -18,6 +19,9 @@ class Gomba:
     def __init__(self, sx = 5, sy = 1):
         if Gomba.image == None:
             Gomba.image = load_image('image/gomba.png')
+        if Gomba.damage_sound == None:
+            Gomba.damage_sound = load_wav('sound/stomp.wav')
+            Gomba.damage_sound.set_volume(server.effect_sound_volume)
         self.frame = 0
         self.Right = False
         self.x = sx * server.tileSize + server.tileSize / 2
@@ -25,6 +29,7 @@ class Gomba:
         self.size_x = server.tileSize
         self.size_y = server.tileSize
         self.dmg = False
+        self.gaccel = 0
 
     def get_bb(self):
         if self.dmg:
@@ -48,14 +53,27 @@ class Gomba:
             else:
                 self.x -= MOVE_SPEED * game_framework.frame_time
 
-            self.y -= server.tileSize
-            if not Crash_Check(self, server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)]):
+            for o in game_world.all_layer_objects(1):
+                if Crash_Check(self, o):
+                    self.Right = not self.Right
+            for o in game_world.all_layer_objects(2):
+                if Crash_Check(self, o):
+                    self.Right = not self.Right
+            self.gravity()
+            if server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)] != 0:
+                self.gaccel = 0
+                self.y = server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)].y + (server.tileSize)
+            else:
                 self.Right = not self.Right
-            self.y += server.tileSize
 
     def damaged(self):
         self.dmg = True
         self.frame = 8
+        self.damage_sound.play(1)
+
+    def gravity(self):
+        self.gaccel += server.Gravity * 1.5 * game_framework.frame_time
+        self.y -= self.gaccel * game_framework.frame_time
 
     def draw(self):
         if self.Right:
@@ -67,9 +85,18 @@ class Gomba:
             a1, a2, a3, a4 = self.get_bb()
             draw_rectangle(a1 - server.cameraPos, a2, a3 - server.cameraPos, a4)
 
+    def __getstate__(self):
+        state = {'x': self.x, 'y': self.y, 'Right': self.Right, 'dmg': self.dmg}
+        return state
+
+    def __setstate__(self, state):
+        self.__init__()
+        self.__dict__.update(state)
+
 
 class Turtle:
     image = None
+    damage_sound = None
     TIME_PER_ACTION = 1.0
     ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
     FRAMES_PER_ACTION = 16
@@ -78,6 +105,9 @@ class Turtle:
     def __init__(self, sx = 6, sy = 1):
         if Turtle.image == None:
             Turtle.image = load_image('image/turtle.png')
+        if Turtle.damage_sound == None:
+            Turtle.damage_sound = load_wav('sound/stomp.wav')
+            Turtle.damage_sound.set_volume(server.effect_sound_volume)
         self.frame = 0
         self.Right = False
         self.x = sx * server.tileSize + server.tileSize / 2
@@ -85,6 +115,8 @@ class Turtle:
         self.size_x = server.tileSize
         self.size_y = server.tileSize / 5 * 7
         self.dmg = False
+        self.gaccel = 0
+
 
     def get_bb(self):
         if self.dmg:
@@ -102,13 +134,27 @@ class Turtle:
             else:
                 self.x -= MOVE_SPEED * game_framework.frame_time
 
-            self.y -= server.tileSize
-            if not Crash_Check(self, server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)]):
+            for o in game_world.all_layer_objects(1):
+                if Crash_Check(self, o):
+                    self.Right = not self.Right
+            for o in game_world.all_layer_objects(2):
+                if Crash_Check(self, o):
+                    self.Right = not self.Right
+
+            self.gravity()
+            if server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)] != 0:
+                self.gaccel = 0
+                self.y = server.TileMap[int(self.x / server.tileSize)][int(self.y / server.tileSize - 1)].y + (server.tileSize)
+            else:
                 self.Right = not self.Right
-            self.y += server.tileSize
 
     def damaged(self):
         self.dmg = True
+        self.damage_sound.play(1)
+
+    def gravity(self):
+        self.gaccel += server.Gravity * 1.5 * game_framework.frame_time
+        self.y -= self.gaccel * game_framework.frame_time
 
     def draw(self):
         if self.dmg:
@@ -122,3 +168,12 @@ class Turtle:
         if server.debugMod:
             a1, a2, a3, a4 = self.get_bb()
             draw_rectangle(a1 - server.cameraPos, a2, a3 - server.cameraPos, a4)
+
+
+    def __getstate__(self):
+        state = {'x': self.x, 'y': self.y, 'Right': self.Right, 'dmg': self.dmg}
+        return state
+
+    def __setstate__(self, state):
+        self.__init__()
+        self.__dict__.update(state)

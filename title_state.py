@@ -3,6 +3,7 @@ from pico2d import *
 
 import main_state
 import make_world1_state
+import world_maker_state
 
 name = "TitleState"
 image = None

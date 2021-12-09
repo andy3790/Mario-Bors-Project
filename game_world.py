@@ -1,3 +1,5 @@
+import pickle
+import server
 
 # layer 0: Background Objects
 # layer 1: Fild Objects
@@ -46,3 +48,14 @@ def all_layer_objects(sel):
     for o in objects[sel]:
         yield o
 
+
+def save():
+    with open('game.sav', 'wb') as f:
+        pickle.dump(objects, f)
+        pickle.dump(server.TileMap, f)
+
+def load():
+    global objects
+    with open('game.sav', 'rb') as f:
+        objects = pickle.load(f)
+        server.TileMap = pickle.load(f)

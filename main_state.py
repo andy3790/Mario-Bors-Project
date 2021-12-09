@@ -68,7 +68,8 @@ def handle_events():
 
 def update():
     for game_object in game_world.all_objects():
-        game_object.update()
+        if server.cameraPos < game_object.x < server.cameraPos + server.tileSize*16:
+            game_object.update()
     # fill here
 
 

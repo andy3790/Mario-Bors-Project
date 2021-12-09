@@ -2,10 +2,12 @@ from pico2d import *
 
 import game_framework
 import game_world
+import item_object
 import server
 from server import PIXEL_PER_METER
 from server import Gravity
 from collision import Crash_Check
+import make_world1_state
 
 
 # Character Run Speed
@@ -21,7 +23,7 @@ MARIO_MAX_JUMP_POWER = 800
 # ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 # FRAMES_PER_ACTION = 9
 
-RIGHT_DOWN, LEFT_DOWN, RIGHT_UP, LEFT_UP, SLEEP_TIMER,  SHIFT_DOWN, SHIFT_UP, SPACE_DOWN, SPACE_UP, JUMP_TO_IDLE, JUMP_TO_WALK, CHECK_TO_JUMP, GAME_OVER  = range(13)
+RIGHT_DOWN, LEFT_DOWN, RIGHT_UP, LEFT_UP, SLEEP_TIMER,  SHIFT_DOWN, SHIFT_UP, SPACE_DOWN, SPACE_UP, JUMP_TO_IDLE, JUMP_TO_WALK, CHECK_TO_JUMP, GAME_OVER, RESETMAP  = range(14)
 
 key_event_table = {
     (SDL_KEYDOWN, SDLK_RIGHT): RIGHT_DOWN,
@@ -311,12 +313,11 @@ class GameOverState:
     ONE_ACTION = FRAMES_PER_ACTION * ACTION_PER_TIME
 
     def enter(mario, event):
-        mario.jstart_pos = 0
-        mario.y = 1
+        mario.jstart_pos = mario.y + 10
         mario.frame_x = 0
         mario.frame_y = 0
         mario.jump_timer = 0
-        mario.jump_power = 400
+        mario.jump_power = 200
         pass
 
     def exit(mario, event):
@@ -329,12 +330,31 @@ class GameOverState:
 
         mario.frame_x = (mario.frame_x + GameOverState.ONE_ACTION * game_framework.frame_time) % 13
 
-        if mario.y < 0:
-            print("GameOverCheck!")
+        if mario.y < -1000:
+            print(mario.y)
+            mario.life -= 1
+            mario.add_event(RESETMAP)
         pass
 
     def draw(mario):
         mario.image_s_game_over.clip_composite_draw(int(mario.frame_x) * 29, 0, 30, 30, 0, '', mario.x - server.cameraPos, mario.y, mario.size_x + 5, mario.size_y + 5)
+        pass
+
+class ResetState:
+    def enter(mario, event):
+        pass
+
+    def exit(mario, event):
+        pass
+
+    def do(mario):
+        pass
+
+    def draw(mario):
+        if mario.life <= 0:
+            print("GameOverCheck!")
+        else:
+            game_framework.change_state(make_world1_state)
         pass
 
 next_state_table = {
@@ -347,7 +367,8 @@ next_state_table = {
     SleepState: {LEFT_DOWN: WalkState_Accel, RIGHT_DOWN: WalkState_Accel, LEFT_UP: WalkState_Accel, RIGHT_UP: WalkState_Accel,
                  SHIFT_DOWN: SleepState, SHIFT_UP: SleepState, GAME_OVER: GameOverState},
     JumpPowerCheckState: {SPACE_DOWN: JumpState, SPACE_UP: JumpState, CHECK_TO_JUMP: JumpState, GAME_OVER: GameOverState},
-    JumpState: {SPACE_DOWN: JumpState, JUMP_TO_WALK: WalkState_Accel, JUMP_TO_IDLE: IdleState, GAME_OVER: GameOverState}
+    JumpState: {SPACE_DOWN: JumpState, JUMP_TO_WALK: WalkState_Accel, JUMP_TO_IDLE: IdleState, GAME_OVER: GameOverState},
+    GameOverState: {RESETMAP: ResetState}
 }
 
 
@@ -362,6 +383,11 @@ class Character:
         self.image_s_run = load_image('image/Mario_small run 25x25.png')
         self.image_s_jump = load_image('image/Mario_small jump 30x30.png')
         self.image_s_game_over = load_image('image/Mario_small GameOver 30x30.png')
+        self.sound_life_lost = load_music('sound/life-lost.mp3')
+        self.sound_life_lost.set_volume(server.bgm_volume)
+        self.sound_power_up = load_wav('sound/power up.wav')
+        self.sound_power_up.set_volume(server.effect_sound_volume)
+
         self.x, self.y = sx * server.tileSize + server.tileSize / 2, sy * server.tileSize + server.tileSize / 2
         self.size_x, self.size_y = server.tileSize * 1.3, server.tileSize * 1.3
         self.hp = 1
@@ -379,6 +405,9 @@ class Character:
         self.event_que = []
         self.cur_state = IdleState
         self.cur_state.enter(self, None)
+        self.coin = 0
+        self.life = 5
+        self.invincibility_timer = 0
         pass
 
     def get_bb(self):
@@ -393,9 +422,22 @@ class Character:
         self.y -= self.gaccel * game_framework.frame_time
 
     def update(self):
+        if self.invincibility_timer > 0:
+            self.invincibility_timer -= game_framework.frame_time
+        if self.invincibility_timer < 0:
+            self.invincibility_timer = 0
+
         self.cur_state.do(self)
-        self.x = clamp(13, self.x, server.tileSize * 100)
+        self.x = clamp(13, self.x, server.tileSize * 200)
         if self.cur_state != GameOverState:
+            for item in server.items:
+                if Crash_Check(self, item):
+                    if isinstance(item, item_object.Item_Mushroom):
+                        if self.hp == 1:
+                            self.hp += 1
+                            self.sound_power_up.play(1)
+                        server.items.remove(item)
+                        game_world.remove_object(item)
             for i in range(-1,1+1):
                 # 전방 충돌체크
                 if Crash_Check(server.mario, server.TileMap[int(self.x / server.tileSize + self.velocity)][int(self.y / server.tileSize + i)]):
@@ -406,26 +448,31 @@ class Character:
                     server.TileMap[int(self.x / server.tileSize + i)][int(self.y / server.tileSize + 1)].hit()
                     self.add_event(CHECK_TO_JUMP)
 
-            for enemy in game_world.all_layer_objects(4):
-                if Crash_Check(server.mario, enemy):
-                    self.hp -= 1
-                    if self.hp <= 0:
-                        self.add_event(GAME_OVER)
-                        # print("damage!")
+            if self.invincibility_timer <= 0:
+                for enemy in game_world.all_layer_objects(4):
+                    if Crash_Check(server.mario, enemy):
+                        self.hp -= 1
+                        if self.hp <= 0:
+                            self.sound_life_lost.play(1)
+                            self.add_event(GAME_OVER)
+                            # print("damage!")
+                        else:
+                            self.invincibility_timer = 2
 
             if self.x - server.cameraPos < server.tileSize * 6:
                 server.cameraPos = clamp(server.MIN_CAMERA_POS, server.cameraPos - game_framework.frame_time * server.tileSize * (5 + self.accel*-5), server.MAX_CAMERA_POS)
             elif self.x - server.cameraPos > server.tileSize * 10:
                 server.cameraPos = clamp(server.MIN_CAMERA_POS, server.cameraPos + game_framework.frame_time * server.tileSize * (5 + self.accel*5), server.MAX_CAMERA_POS)
 
-            if len(self.event_que) > 0:
-                event = self.event_que.pop()
-                self.cur_state.exit(self, event)
-                if event in next_state_table[self.cur_state]:
-                    self.cur_state = next_state_table[self.cur_state][event]
-                self.cur_state.enter(self, event)
-            self.gravity()
+        if len(self.event_que) > 0:
+            event = self.event_que.pop()
+            self.cur_state.exit(self, event)
+            if event in next_state_table[self.cur_state]:
+                self.cur_state = next_state_table[self.cur_state][event]
+            self.cur_state.enter(self, event)
 
+        if self.cur_state != GameOverState:
+            self.gravity()
             if self.y <= 0:
                 self.add_event(GAME_OVER)
                 self.y = server.tileSize
@@ -449,7 +496,8 @@ class Character:
         pass
 
     def draw(self):
-        self.cur_state.draw(self)
+        if int(self.invincibility_timer*10 % 2) == 0:
+            self.cur_state.draw(self)
 
         if server.debugMod:
             debug_print('Velocity :' + str(self.velocity) + ' Dir:' + str(self.dir) + ' State:' + str(self.cur_state))
@@ -462,3 +510,11 @@ class Character:
             key_event = key_event_table[(event.type, event.key)]
             self.add_event(key_event)
         pass
+
+    def __getstate__(self):
+        state = {'x': self.x, 'y': self.y, 'coin': self.coin, 'life': self.life}
+        return state
+
+    def __setstate__(self, state):
+        self.__init__()
+        self.__dict__.update(state)

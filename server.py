@@ -7,8 +7,11 @@ tileSize = PIXEL_PER_METER # 1 m
 MAX_CAMERA_POS = 0
 MIN_CAMERA_POS = 0
 cameraPos = 0
+bgm_volume = 16
+effect_sound_volume = 32
 
-debugMod = True
+
+debugMod = False
 mario = None
 map = None
 enemys = []
